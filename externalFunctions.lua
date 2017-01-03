@@ -91,7 +91,7 @@ local function calcThreshold(X, delta_size, faces, nonfaces)
 
 	
 
-
+	--- store X * faces, X * nonfaces, this is used in training step
 	
 	return face_mean, face_sd, nonface_mean, nonface_sd;
 
