@@ -27,13 +27,14 @@ print(numRows_faces .. ' pixels each (rows)');
 --print(numRows_nonfaces .. ' pixels each (rows)');
 
 
--------- generate weak classifiers --------------------------------
+-------- generate weak classifiers ---------------------------------------------
 delta_size = 36480;
 dim = 16;
 
+-- weak classifier matrix, each w.c. stored as column vector 
 delta = torch.Tensor(dim * dim, delta_size):zero();
--- populate each column of delta with haar-feature
-window, window_t = ext.createTrain(dim, dim);
 
--- features = 
+-- populate each column of delta with haar-feature
+delta = ext.generateWC(dim, delta_size);
+-------- finished generating weak classifiers ----------------------------------
 
