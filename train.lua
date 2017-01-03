@@ -35,19 +35,19 @@ dim = 16;
 delta = torch.Tensor(dim * dim, delta_size):zero();
 
 -- populate each column of delta with haar-feature
-delta = ext.generateWC(dim, delta_size);
+--delta = ext.generateWC(dim, delta_size);
 -------- finished generating weak classifiers ----------------------------------
+
 
 ------ calculate threshold -----------------------------------------------------
 weak = delta:t();
-
-
-
-
+--[[
 
 start_time = os.time();
 
-face_mean, face_sd, nonface_mean, nonface_sd = ext.calcThreshold(weak, delta_size, faces, nonfaces);
+face_mean, face_sd, nonface_mean, nonface_sd = ext.calcThreshold(weak, 
+	delta_size, faces, nonfaces);
+
 print('face_mean: ' .. face_mean:size()[1]);
 print('face_sd: ' .. face_sd:size()[1]);
 
@@ -60,4 +60,22 @@ elapsed_time = os.difftime(end_time, start_time);
 print('total runtime: ' .. elapsed_time .. 'seconds');
 
 
+--]]
 ------ finished calculating threshold ------------------------------------------
+
+
+
+
+----- create training matrix ---------------------------------------------------
+
+X_train, Y_train = ext.createTrain(faces, nonfaces);
+
+print('X_train: ' .. X_train:size()[2] .. ' images');
+print('Y_train: ' .. Y_train:size()[1] .. ' results');
+
+------ finished creating training matrix ---------------------------------------
+
+
+
+
+

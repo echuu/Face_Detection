@@ -1,7 +1,8 @@
 ----------------------------- externalFunctions.lua
 ------ FUNCTIONS:
 -- generateWC()
--- createWindow
+-- createWindow()
+-- calcThreshold()
 -------------------------------------
 
 local M = {}
@@ -24,8 +25,33 @@ M.DIM           = 16;
 M.NUM_FACES     = 11838;
 M.NUM_NONFACES  = 45356;
 
+-- negatives
+
+
 ---------------------- END GLOBAL VARIABLE DECLARATION -------------------------
 
+
+--[[
+	create training matrix   X : [ faces | nonfaces | negatives ]
+	create true value vector Y : Y[i] = 1 for face, Y[i] = -1 for nonface
+--]]
+local function createTrain(pos, neg)
+
+	local X, Y, total_images;
+
+	total_images = M.NUM_FACES + M.NUM_NONFACES; -- 57194 total faces + nonfaces
+
+	X = torch.Tensor(M.DIM * M.DIM, total_images);
+	Y = torch.Tensor(total_images, 1):fill(-1);
+
+	Y[{{1, M.NUM_FACES}}] = 1; -- faces <=> 1
+	X[{{}, {1, M.NUM_FACES}}] = pos[{{}, {1, M.NUM_FACES}}];
+	X[{{}, {M.NUM_FACES+1, total_images}}] = neg[{{}, {1, M.NUM_NONFACES}}];
+	-- add line to incorporate hard negatives
+
+	return X, Y
+
+end ------------------------------------------------------- end of createTrain()
 
 local function calcThreshold(X, delta_size, faces, nonfaces)
 	-- X : 36480 x 256
@@ -51,7 +77,6 @@ local function calcThreshold(X, delta_size, faces, nonfaces)
 	for i = 1, 40 do
 		sum = torch.mean(pos_X[{{i},{}}]);
 		print(sum);
-		--print('sum of col '..i..' = '..sum);
 	end
 
 	end_time = os.time();
@@ -93,8 +118,8 @@ local function generateWC(dim, delta_size)
 
 					w1, w2 = M.createWindow(i, j, height, width, dim, 1);
 
-					delta[{{}, {col}}]      = w1;
-					delta[{{}, {col + 1}}]  = w2;
+					delta[{{}, {col}}]      = w2;
+					delta[{{}, {col + 1}}]  = w1;
 					--print('Generating weak classifier: '.. col);
 					--print('Generating weak classifier: '.. col + 1);
 
@@ -115,8 +140,8 @@ local function generateWC(dim, delta_size)
 
 					w1, w2 = M.createWindow(i, j, height, width, dim, 2);
 
-					delta[{{}, {col}}]      = w1;
-					delta[{{}, {col + 1}}]  = w2;
+					delta[{{}, {col}}]      = w2;
+					delta[{{}, {col + 1}}]  = w1;
 
 					--print('Generating weak classifier: '.. col);
 					--print('Generating weak classifier: '.. col + 1);
@@ -221,6 +246,7 @@ end ----------------------------------------------------- end of createWindow()
 M.generateWC    = generateWC;
 M.createWindow  = createWindow;
 M.calcThreshold = calcThreshold;
+M.createTrain   = createTrain;
 --------------- end function declarations ---
 
 
