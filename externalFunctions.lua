@@ -48,15 +48,21 @@ local function calcThreshold(X, delta_size, faces, nonfaces)
 	
 	pos_X = X * faces;    -- 36480 x 11838
 
+	for i = 1, 40 do
+		sum = torch.mean(pos_X[{{i},{}}]);
+		print(sum);
+		--print('sum of col '..i..' = '..sum);
+	end
+
 	end_time = os.time();
 	elapsed_time = os.difftime(end_time, start_time);
 	print('done with positives - total elapsed: ' .. elapsed_time .. 'seconds');
 
-	neg_X = X * nonfaces; -- 36480 x 45356
+	-- neg_X = X * nonfaces; -- 36480 x 45356
 
 	end_time = os.time();
 	elapsed_time = os.difftime(end_time, start_time);
-	print('done with negatives - total elapsed: ' .. elapsed_time .. 'seconds');
+	-- print('done with negatives - total elapsed: ' .. elapsed_time .. 'seconds');
 
 	
 
