@@ -32,6 +32,8 @@ delta_size = 36480;
 dim = 16;
 
 delta = torch.Tensor(dim * dim, delta_size):zero();
-ext.createTrain();
+-- populate each column of delta with haar-feature
+window, window_t = ext.createTrain(dim, dim);
+
 -- features = 
 
