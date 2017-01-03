@@ -19,12 +19,12 @@ numCols_faces = faces:size()[2];
 print(numCols_faces .. ' of faces (columns)');
 print(numRows_faces .. ' pixels each (rows)');
 
---nonfaces = csv2tensor.load("/home/eric/Face_Detection/nonfaces.csv");
---numRows_nonfaces = nonfaces:size()[1];
---numCols_nonfaces = nonfaces:size()[2];
+nonfaces = csv2tensor.load("/home/eric/Face_Detection/nonfaces.csv");
+numRows_nonfaces = nonfaces:size()[1];
+numCols_nonfaces = nonfaces:size()[2];
 
---print(numCols_nonfaces .. ' of nonfaces (columns)');
---print(numRows_nonfaces .. ' pixels each (rows)');
+print(numCols_nonfaces .. ' of nonfaces (columns)');
+print(numRows_nonfaces .. ' pixels each (rows)');
 
 
 -------- generate weak classifiers ---------------------------------------------
@@ -38,3 +38,26 @@ delta = torch.Tensor(dim * dim, delta_size):zero();
 delta = ext.generateWC(dim, delta_size);
 -------- finished generating weak classifiers ----------------------------------
 
+------ calculate threshold -----------------------------------------------------
+weak = delta:t();
+
+
+
+
+
+start_time = os.time();
+
+face_mean, face_sd, nonface_mean, nonface_sd = ext.calcThreshold(weak, delta_size, faces, nonfaces);
+print('face_mean: ' .. face_mean:size()[1]);
+print('face_sd: ' .. face_sd:size()[1]);
+
+print('nonface_mean: ' .. nonface_mean:size()[1]);
+print('nonface_sd: ' .. nonface_sd:size()[1]);
+
+
+end_time = os.time();
+elapsed_time = os.difftime(end_time, start_time);
+print('total runtime: ' .. elapsed_time .. 'seconds');
+
+
+------ finished calculating threshold ------------------------------------------

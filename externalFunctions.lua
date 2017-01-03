@@ -1,12 +1,12 @@
 ----------------------------- externalFunctions.lua
 ------ FUNCTIONS:
--- createTrain()
 -- generateWC()
 -- createWindow
 -------------------------------------
 
 local M = {}
 
+----------------------- GLOBAL VARIABLE DECLARATION -------------------------
 -- feature 1
 M.HAAR_1_COLS = 2;
 M.HAAR_1_ROWS = 1;
@@ -19,20 +19,54 @@ M.HAAR_2_ROWS = 1;
 M.HAAR_3_ROWS = 2;
 M.HAAR_3_COLS = 2;
 
-local function createTrain(dim)
-	print("Printing from externalFunctions.lua");
+-- dimension of faces
+M.DIM           = 16;
+M.NUM_FACES     = 11838;
+M.NUM_NONFACES  = 45356;
+
+---------------------- END GLOBAL VARIABLE DECLARATION -------------------------
+
+
+local function calcThreshold(X, delta_size, faces, nonfaces)
+	-- X : 36480 x 256
+	local face_mean, face_sd, nonface_mean, nonface_sd, pos, neg;
+
+	face_mean    = torch.FloatTensor(delta_size, 1):zero();
+	face_sd      = torch.FloatTensor(delta_size, 1):zero();
+
+	nonface_mean = torch.FloatTensor(delta_size, 1):zero();
+	nonface_sd   = torch.FloatTensor(delta_size, 1):zero();
+
+	-- store result of dot product of each weak classifier of each face/nonface
+	pos          = torch.Tensor(M.NUM_FACES, 1):zero();
+	neg          = torch.Tensor(M.NUM_NONFACES, 1):zero();
+
+	print('dim of delta: ' .. X:size()[1] .. ' x '.. X:size()[2]);
+
+
+	start_time = os.time();
+	
+	pos_X = X * faces;    -- 36480 x 11838
+
+	end_time = os.time();
+	elapsed_time = os.difftime(end_time, start_time);
+	print('done with positives - total elapsed: ' .. elapsed_time .. 'seconds');
+
+	neg_X = X * nonfaces; -- 36480 x 45356
+
+	end_time = os.time();
+	elapsed_time = os.difftime(end_time, start_time);
+	print('done with negatives - total elapsed: ' .. elapsed_time .. 'seconds');
 
 	
-	window = torch.Tensor(dim, dim):zero();
-	for i = 1, dim do
-		window[i][i] = -999;
-	end
-	window_t = window + torch.eye(dim);
-	
 
-	M.test(); -- call to function within same file
-	return window, window_t;
-end
+
+	
+	return face_mean, face_sd, nonface_mean, nonface_sd;
+
+end ------------------------------------------------ end of calculateThreshold()
+
+
 
 local function generateWC(dim, delta_size)
 	local delta = torch.Tensor(dim * dim, delta_size):zero();
@@ -55,8 +89,8 @@ local function generateWC(dim, delta_size)
 
 					delta[{{}, {col}}]      = w1;
 					delta[{{}, {col + 1}}]  = w2;
-					print('Generating weak classifier: '.. col);
-					print('Generating weak classifier: '.. col + 1);
+					--print('Generating weak classifier: '.. col);
+					--print('Generating weak classifier: '.. col + 1);
 
 					col = col + 2;
 				end
@@ -78,8 +112,8 @@ local function generateWC(dim, delta_size)
 					delta[{{}, {col}}]      = w1;
 					delta[{{}, {col + 1}}]  = w2;
 
-					print('Generating weak classifier: '.. col);
-					print('Generating weak classifier: '.. col + 1);
+					--print('Generating weak classifier: '.. col);
+					--print('Generating weak classifier: '.. col + 1);
 
 					col = col + 2;
 				end
@@ -100,8 +134,8 @@ local function generateWC(dim, delta_size)
 					delta[{{}, {col}}]      = w1;
 					delta[{{}, {col + 1}}]  = w2;
 
-					print('Generating weak classifier: '.. col);
-					print('Generating weak classifier: '.. col + 1);
+					--print('Generating weak classifier: '.. col);
+					--print('Generating weak classifier: '.. col + 1);
 
 					col = col + 2;
 				end
@@ -111,12 +145,9 @@ local function generateWC(dim, delta_size)
 
 	print("Generated ".. col-1 .. " weak classifiers.");
 
-end ----------------------------------------------------  - end of createTrain()
+	return delta;
 
-
-local function test()
-	print('printing from test function inside externalFunctions');
-end
+end ----------------------------------------------------- end of generateWC()
 
 
 local function createWindow(pos_i, pos_j, height, width, dim, type)
@@ -178,13 +209,12 @@ local function createWindow(pos_i, pos_j, height, width, dim, type)
 
 	return w1_col, w2_col;
 
-end
+end ----------------------------------------------------- end of createWindow()
 
 ------- function declarations ---------------
-M.createTrain   = createTrain;
-M.test          = test;
 M.generateWC    = generateWC;
 M.createWindow  = createWindow;
+M.calcThreshold = calcThreshold;
 --------------- end function declarations ---
 
 
