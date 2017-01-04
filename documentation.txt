@@ -1,0 +1,60 @@
+Data Documentation:
+
+var name:			dimensions:					meaning:
+
+M.NUM_FACES 		11838						# of faces
+M.NUM_NONFACES		45356	 					# of nonfaces
+
+total_imgs			57194						# of faces, nonfaces
+
+delta_size			36480						# weak classifiers
+
+delta   			256 x delta_size			weak classifier matrix, each
+												column corresponds to a weak
+												classifier, each weak classifier
+												is 16 x 16 -> 256 x 1 vector	
+
+faces 				256 x 11838					matrix rep. of faces    (cols)
+
+nonface   			256 x 45356					matrix rep. of nonfaces (cols)
+
+pos_X				11838 x delta_size			faces' * delta, projection of
+												each face onto each weak
+												classifier, i.e., 
+												col_i = projection of all faces
+												on wk_classifier_i
+
+neg_X				45356 x delta_size          nonfaces' * delta, projection of
+												each nonface onto each weak
+												classiifer, i.e., 
+												col_i = projection of all 
+												nonfaces on wk_classifier_i
+												
+proj				total_imgs x delta_size		projections of each image onto
+												each weak classifier, i.e.,
+												col_i = projection of each img
+												onto wk_classifier_i, where
+												i \in [1, delta_size]
+
+face_mean			delta_size x 1 				vector storing means of all
+												faces projected onto i-th weak
+												classifier, i.e., 
+												face_mean[i] = 
+												mean(<face_j, wk_classifier_i>),
+												where j \in [1, M.NUM_FACES]
+
+face_sd				delta_size x 1 				vector storing sd of all
+												faces projected onto i-th weak
+												classifier, i.e.,
+												face_sd[i] = 
+												sd(<face_j, wk_classifier_i)>,
+												where j \in [1, M.NUM_FACES]
+
+nonface_mean		delta_size x 1 				vector storing means of all
+												nonfaces projected onto i-th
+												weak classifier
+												
+nonface_sd			delta_size x 1  			vector storing sd of all
+												nonfaces projected onto i-th
+												weak classifier 
+

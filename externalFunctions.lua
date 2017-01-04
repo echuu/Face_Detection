@@ -96,7 +96,7 @@ local function calcThreshold(delta, delta_size, faces, nonfaces)
 
 	if M.DEBUG == 1 then
 		print('displaying first 50 values of nonface_mean:');
-		print(face_mean[{{1,50}}]);
+		print(nonface_mean[{{1,50}}]);
 		end_time = os.time();
 		elapsed_time = os.difftime(end_time, start_time);
 		print('negatives done - total elapsed: ' .. elapsed_time .. ' seconds');

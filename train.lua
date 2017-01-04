@@ -7,26 +7,25 @@
 -- delta_size = 36480 (number of weak classifiers)
 ----------------------------------
 
-csv2tensor   =  require 'csv2tensor';
+-- csv2tensor   =  require 'csv2tensor';
 local ext    =  require('externalFunctions');
 
 
 print('Begin reading in training data');
-faces = csv2tensor.load("/home/eric/Face_Detection/faces.csv");
+--faces = csv2tensor.load("/home/eric/Face_Detection/faces.csv");
+faces = torch.load('faces.dat');
 numRows_faces = faces:size()[1];
 numCols_faces = faces:size()[2];
 
 print(numCols_faces .. ' of faces (columns)');
 print(numRows_faces .. ' pixels each (rows)');
 
-nonfaces = csv2tensor.load("/home/eric/Face_Detection/nonfaces.csv");
+nonfaces = torch.load('nonfaces.dat');
 numRows_nonfaces = nonfaces:size()[1];
 numCols_nonfaces = nonfaces:size()[2];
 
 print(numCols_nonfaces .. ' of nonfaces (columns)');
 print(numRows_nonfaces .. ' pixels each (rows)');
-
-
 
 -------- generate weak classifiers ---------------------------------------------
 delta_size = 36480;
@@ -44,11 +43,11 @@ torch.save('delta.dat', delta); -- write out delta matrix to data file
 ------ calculate threshold -----------------------------------------------------
 total_images = ext.NUM_FACES + ext.NUM_NONFACES;
 
-face_mean    = torch.FloatTensor(delta_size, 1):zero();
-face_sd      = torch.FloatTensor(delta_size, 1):zero();
-nonface_mean = torch.FloatTensor(delta_size, 1):zero();
-nonface_sd   = torch.FloatTensor(delta_size, 1):zero();
-proj         = torch.FloatTensor(total_images, delta_size):zero();
+--face_mean    = torch.FloatTensor(delta_size, 1):zero();
+--face_sd      = torch.FloatTensor(delta_size, 1):zero();
+--nonface_mean = torch.FloatTensor(delta_size, 1):zero();
+--nonface_sd   = torch.FloatTensor(delta_size, 1):zero();
+--proj         = torch.FloatTensor(total_images, delta_size):zero();
 
 start_time = os.time();
 
