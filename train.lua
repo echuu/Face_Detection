@@ -27,6 +27,7 @@ print(numCols_nonfaces .. ' of nonfaces (columns)');
 print(numRows_nonfaces .. ' pixels each (rows)');
 
 
+
 -------- generate weak classifiers ---------------------------------------------
 delta_size = 36480;
 dim = 16;
@@ -35,18 +36,24 @@ dim = 16;
 delta = torch.Tensor(dim * dim, delta_size):zero();
 
 -- populate each column of delta with haar-feature
---delta = ext.generateWC(dim, delta_size);
+delta = ext.generateWC(dim, delta_size);
+torch.save('delta.dat', delta); -- write out delta matrix to data file
 -------- finished generating weak classifiers ----------------------------------
 
 
 ------ calculate threshold -----------------------------------------------------
-weak = delta:t();
---[[
+total_images = ext.NUM_FACES + ext.NUM_NONFACES;
+
+face_mean    = torch.FloatTensor(delta_size, 1):zero();
+face_sd      = torch.FloatTensor(delta_size, 1):zero();
+nonface_mean = torch.FloatTensor(delta_size, 1):zero();
+nonface_sd   = torch.FloatTensor(delta_size, 1):zero();
+proj         = torch.FloatTensor(total_images, delta_size):zero();
 
 start_time = os.time();
 
-face_mean, face_sd, nonface_mean, nonface_sd = ext.calcThreshold(weak, 
-	delta_size, faces, nonfaces);
+face_mean, face_sd, nonface_mean, nonface_sd, proj = ext.calcThreshold(delta, 
+	delta_size, faces:t(), nonfaces:t());
 
 print('face_mean: ' .. face_mean:size()[1]);
 print('face_sd: ' .. face_sd:size()[1]);
@@ -60,19 +67,22 @@ elapsed_time = os.difftime(end_time, start_time);
 print('total runtime: ' .. elapsed_time .. 'seconds');
 
 
---]]
+print('writing data files');
+torch.save('face_mean.dat',     face_mean);
+torch.save('face_sd.dat',       face_sd);
+torch.save('nonface_mean.dat',  nonface_mean);
+torch.save('nonface_sd.dat',    nonface_sd);
+torch.save('proj.dat',          proj);
+print('finished writing data files');
 ------ finished calculating threshold ------------------------------------------
 
 
-
-
 ----- create training matrix ---------------------------------------------------
+Y_train = ext.createTrain(faces, nonfaces);
 
-X_train, Y_train = ext.createTrain(faces, nonfaces);
-
-print('X_train: ' .. X_train:size()[2] .. ' images');
 print('Y_train: ' .. Y_train:size()[1] .. ' results');
 
+torch.save('Y_train.dat', Y_train);
 ------ finished creating training matrix ---------------------------------------
 
 

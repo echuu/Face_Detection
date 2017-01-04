@@ -28,6 +28,10 @@ M.NUM_NONFACES  = 45356;
 -- negatives
 
 
+-- debug
+M.DEBUG = 1;
+
+
 ---------------------- END GLOBAL VARIABLE DECLARATION -------------------------
 
 
@@ -37,24 +41,24 @@ M.NUM_NONFACES  = 45356;
 --]]
 local function createTrain(pos, neg)
 
-	local X, Y, total_images;
+	local Y, total_images;
 
 	total_images = M.NUM_FACES + M.NUM_NONFACES; -- 57194 total faces + nonfaces
 
-	X = torch.Tensor(M.DIM * M.DIM, total_images);
+	-- X = torch.Tensor(M.DIM * M.DIM, total_images);
 	Y = torch.Tensor(total_images, 1):fill(-1);
 
 	Y[{{1, M.NUM_FACES}}] = 1; -- faces <=> 1
-	X[{{}, {1, M.NUM_FACES}}] = pos[{{}, {1, M.NUM_FACES}}];
-	X[{{}, {M.NUM_FACES+1, total_images}}] = neg[{{}, {1, M.NUM_NONFACES}}];
+	--X[{{}, {1, M.NUM_FACES}}] = pos[{{}, {1, M.NUM_FACES}}];
+	--X[{{}, {M.NUM_FACES+1, total_images}}] = neg[{{}, {1, M.NUM_NONFACES}}];
 	-- add line to incorporate hard negatives
 
-	return X, Y
+	return Y;
 
 end ------------------------------------------------------- end of createTrain()
 
-local function calcThreshold(X, delta_size, faces, nonfaces)
-	-- X : 36480 x 256
+local function calcThreshold(delta, delta_size, faces, nonfaces)
+	-- delta : 36480 x 256
 	local face_mean, face_sd, nonface_mean, nonface_sd, pos, neg;
 
 	face_mean    = torch.FloatTensor(delta_size, 1):zero();
@@ -67,33 +71,43 @@ local function calcThreshold(X, delta_size, faces, nonfaces)
 	pos          = torch.Tensor(M.NUM_FACES, 1):zero();
 	neg          = torch.Tensor(M.NUM_NONFACES, 1):zero();
 
-	print('dim of delta: ' .. X:size()[1] .. ' x '.. X:size()[2]);
+	print('dim of delta: ' .. delta:size()[1] .. ' x '.. delta:size()[2]);
 
 
 	start_time = os.time();
-	
-	pos_X = X * faces;    -- 36480 x 11838
 
-	for i = 1, 40 do
-		sum = torch.mean(pos_X[{{i},{}}]);
-		print(sum);
+	-- project each face onto every weak classifier	
+	pos_X     = faces * delta;    -- 11838 x 36480 (rows <=> faces)
+	-- calculate mean of each column (projections of every face on wk class.)
+	face_mean = torch.mean(pos_X, 1):t();
+	face_sd   = torch.std(pos_X, 1):t();
+
+	if M.DEBUG == 1 then
+		print('displaying first 50 values of face_mean:');
+		print(face_mean[{{1,50}}]);
+		end_time = os.time();
+		elapsed_time = os.difftime(end_time, start_time);
+		print('positives done - total elapsed: ' .. elapsed_time .. ' seconds');
 	end
 
-	end_time = os.time();
-	elapsed_time = os.difftime(end_time, start_time);
-	print('done with positives - total elapsed: ' .. elapsed_time .. 'seconds');
+	neg_X         = nonfaces * delta; -- 45356 x 36480
+	nonface_mean  = torch.mean(neg_X, 1):t();
+	nonface_std   = torch.std(neg_X, 1):t();
 
-	-- neg_X = X * nonfaces; -- 36480 x 45356
-
-	end_time = os.time();
-	elapsed_time = os.difftime(end_time, start_time);
-	-- print('done with negatives - total elapsed: ' .. elapsed_time .. 'seconds');
+	if M.DEBUG == 1 then
+		print('displaying first 50 values of nonface_mean:');
+		print(face_mean[{{1,50}}]);
+		end_time = os.time();
+		elapsed_time = os.difftime(end_time, start_time);
+		print('negatives done - total elapsed: ' .. elapsed_time .. ' seconds');
+	end
 
 	
 
-	--- store X * faces, X * nonfaces, this is used in training step
+	--- store delta * faces, delta * nonfaces, this is used in training step
+	proj = torch.cat(pos_X, neg_X, 1);
 	
-	return face_mean, face_sd, nonface_mean, nonface_sd;
+	return face_mean, face_sd, nonface_mean, nonface_sd, proj;
 
 end ------------------------------------------------ end of calculateThreshold()
 
