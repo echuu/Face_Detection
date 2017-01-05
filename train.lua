@@ -77,7 +77,7 @@ torch.save('face_mean.dat',     face_mean);
 torch.save('face_sd.dat',       face_sd);
 torch.save('nonface_mean.dat',  nonface_mean);
 torch.save('nonface_sd.dat',    nonface_sd);
-torch.save('projections.dat',          proj);
+torch.save('projections.dat',   proj);
 print('finished writing data files');
 ------ finished calculating threshold ------------------------------------------
 
