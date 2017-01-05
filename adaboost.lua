@@ -56,6 +56,17 @@ local function adaboost()
 	nonface_sd   = torch.load('nonface_sd.dat');
 	Y_train      = torch.load('Y_train.dat');
 
+	num_imgs     = proj:size()[1]; -- num of total images (# rows of proj)
+
+
+	-- initialize current weights, previous weights for images
+	wts_cur  = torch.Tensor(num_imgs, 1);
+	wts_prev = torch.Tensor(num_imgs, 1);
+
+	wts_cur  = 1 / num_imgs;
+	wts_prev = 1 / num_imgs;
+
+
 	-- precompute the classifications
 		-- make call to classify.kmeans()
 	print('Begin classification');
@@ -69,7 +80,7 @@ local function adaboost()
 		
 		-- indicator: +1 if correct class vector holds correct class., else -1
 		indicator = torch.eq(Y_train, class);
-		
+
 		-- store weighted error
 		-- sorted ratio
 
