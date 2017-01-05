@@ -7,25 +7,31 @@
 -- delta_size = 36480 (number of weak classifiers)
 ----------------------------------
 
--- csv2tensor   =  require 'csv2tensor';
+--csv2tensor   =  require 'csv2tensor';
 local ext    =  require('externalFunctions');
-
+local debug  = 1;
 
 print('Begin reading in training data');
---faces = csv2tensor.load("/home/eric/Face_Detection/faces.csv");
+-- faces = csv2tensor.load("/home/wayne/Face_Detection/faces.csv");
 faces = torch.load('faces.dat');
-numRows_faces = faces:size()[1];
-numCols_faces = faces:size()[2];
 
-print(numCols_faces .. ' of faces (columns)');
-print(numRows_faces .. ' pixels each (rows)');
 
-nonfaces = torch.load('nonfaces.dat');
-numRows_nonfaces = nonfaces:size()[1];
-numCols_nonfaces = nonfaces:size()[2];
+nonfaces = csv2tensor.load("/home/wayne/Face_Detection/faces.csv");
+-- nonfaces = torch.load('nonfaces.dat');
 
-print(numCols_nonfaces .. ' of nonfaces (columns)');
-print(numRows_nonfaces .. ' pixels each (rows)');
+if debug == 1 then
+	numRows_faces = faces:size()[1];
+	numCols_faces = faces:size()[2];
+
+	print(numCols_faces .. ' of faces (columns)');
+	print(numRows_faces .. ' pixels each (rows)');
+
+	numRows_nonfaces = nonfaces:size()[1];
+	numCols_nonfaces = nonfaces:size()[2];
+
+	print(numCols_nonfaces .. ' of nonfaces (columns)');
+	print(numRows_nonfaces .. ' pixels each (rows)');
+end
 
 -------- generate weak classifiers ---------------------------------------------
 delta_size = 36480;
@@ -71,7 +77,7 @@ torch.save('face_mean.dat',     face_mean);
 torch.save('face_sd.dat',       face_sd);
 torch.save('nonface_mean.dat',  nonface_mean);
 torch.save('nonface_sd.dat',    nonface_sd);
-torch.save('proj.dat',          proj);
+torch.save('projections.dat',          proj);
 print('finished writing data files');
 ------ finished calculating threshold ------------------------------------------
 
