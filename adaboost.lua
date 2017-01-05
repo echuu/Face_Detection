@@ -46,6 +46,8 @@ boost.adaboost()
 
 local function adaboost()
 	-- precompute the projections
+
+
 	delta        = torch.load('delta.dat');
 	proj         = torch.load('projections.dat');
 	face_mean    = torch.load('face_mean.dat');
@@ -54,12 +56,31 @@ local function adaboost()
 	nonface_sd   = torch.load('nonface_sd.dat');
 	Y_train      = torch.load('Y_train.dat');
 
-	-- center the projections w.r.t. faces, nonfaces
-	-- cent_faces     = proj -   
-	-- cent_nonfaces  = 
-
 	-- precompute the classifications
 		-- make call to classify.kmeans()
+	print('Begin classification');
+	start_time = os.time();
+
+	weighted_err = torch.Tensor(delta_size, 1);
+	for i = 1, proj:size()[2] do
+		-- pass in i-th column of proj to classiifer
+		class = classify.ll_classify(proj[{{}, {i}}],
+			face_mean[i], face_sd[i], nonface_mean[i], nonface_sd[i]);
+		
+		-- indicator: +1 if correct class vector holds correct class., else -1
+		indicator = torch.eq(Y_train, class);
+		
+		-- store weighted error
+		-- sorted ratio
+
+	end
+
+
+	end_time = os.time();
+	elapsed_time = os.difftime(end_time, start_time);
+	print('total runtime of classifications: ' .. elapsed_time .. 'seconds');
+
+	
 	
 	-- boost weak classifiers
 

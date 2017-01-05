@@ -34,7 +34,10 @@ proj				total_imgs x delta_size		projections of each image onto
 												each weak classifier, i.e.,
 												col_i = projection of each img
 												onto wk_classifier_i, where
-												i \in [1, delta_size]
+												i \in [1, delta_size], where the
+												j-th element of col_i is:
+												<img_j, col_i>, where
+												j \in [1, total_imgs]
 
 face_mean			delta_size x 1 				vector storing means of all
 												faces projected onto i-th weak
@@ -53,8 +56,10 @@ face_sd				delta_size x 1 				vector storing sd of all
 nonface_mean		delta_size x 1 				vector storing means of all
 												nonfaces projected onto i-th
 												weak classifier
-												
+
 nonface_sd			delta_size x 1  			vector storing sd of all
 												nonfaces projected onto i-th
 												weak classifier 
 
+weighted_err    	delta_size x 1 				weighted error corresponding to
+												each weak classifier
