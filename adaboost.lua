@@ -103,8 +103,14 @@ local function adaboost(T)
 	weighted_err = torch.Tensor(1, delta_size);
 	alpha        = torch.Tensor(1, T);
 	ada_index    = torch.Tensor(1, T);
-	F_ip         = torch.Tensor(num_imgs, 1); -- store the inner product of all
-											  -- imgs with every weak classifier
+	
+
+	-- below calculations can use the precomputed projections, just need
+	-- to multiply by alpha[t]
+	F_t          = torch.Tensor(T, num_imgs); -- weighted dot products 
+	H_t          = torch.Tensor(T, num_imgs); -- (weighted) classifications
+	Err_t        = torch.Tensor(T, 1);        -- empirical error
+
 
 	for t = 1, T do
 		iter_start = os.time();

@@ -63,3 +63,19 @@ nonface_sd			delta_size x 1  			vector storing sd of all
 
 weighted_err    	delta_size x 1 				weighted error corresponding to
 												each weak classifier
+
+F_t					T x total_imgs				store the computed F value for
+												each image, for each iteration
+												of adaboost; each row t ~ 
+												alpha_t * <h_i, x>
+												where h_i is the wk. class.
+												chosen for that iteration of
+												adaboost, and x ranges over all
+												images
+
+H_t					T x total_imgs 				classification of all images;
+												each element = sign(F_t(x_i))
+
+Err_t				T x 1 						empirical error for iteration t;
+												sum (H_t != true class) across
+												rows of H_t
