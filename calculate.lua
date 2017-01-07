@@ -54,7 +54,20 @@ local function strongClass(alpha_t, proj_min, F_T, t)
 	return strong_decision, F_t;
 end
 
-local function displayErrorTime(iter, error)
+
+local function updateWeights(Y_train, F_t, wts_prev, Z_T)
+
+	-- compute exponential portion
+	Y_F = F_t * Y_train:t();
+	
+
+	return wts_curr, Z;
+end
+
+
+
+
+local function displayErrorTime(iter, error, start_time)
 
 	end_iter_time = os.time();
 	time = os.difftime(end_iter_time, iter_start);

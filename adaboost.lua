@@ -109,7 +109,8 @@ local function adaboost(T)
 	-- below calculations can use the precomputed projections, just need
 	-- to multiply by alpha[t]
 	F_T          = torch.Tensor(num_imgs, T); -- weighted dot products 
-	H_t          = torch.Tensor(T, num_imgs); -- (weighted) classifications
+	--H_T          = torch.Tensor(T, num_imgs); -- (weighted) classifications
+	Z_T          = torch.Tensor(T, 1);        -- normalizing function
 	Err_T        = torch.Tensor(T, 1);        -- empirical error
 
 
@@ -129,12 +130,14 @@ local function adaboost(T)
 		-- update wts_prev, alpha
 		wts_prev = wts_cur;
 		alpha[t] = 0.5 * torch.log((1 - wt_err) / wt_err);
-		-- call update weight function for wts_cur, normalization contant
 
 		-- calculate empirical error (minimize)
 		proj_i = proj[{{},{min_ind}}];
 		Err_T[t], F_T[{{},{t}}] = calc.getEmpiricalError(Y_train, proj_i,
 			alpha[t], F_T, t);
+
+		-- call update weight function for wts_cur, normalization contant
+		
 
 		-- display empirical error for this iteration
 		displayErrorTime(t, Err_T[t], start_time);
