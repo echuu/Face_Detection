@@ -3,6 +3,7 @@
 
 local test = {}
 
+local calc = require "calculate";
 
 local function modify(x)
 
@@ -16,12 +17,7 @@ end
 
 test.modify = modify;
 
-x = torch.Tensor({{1},{2},{3}});
-print('premodify:');
-print(x);
-print('postmodify:');
-test.modify(x)
-print(x);
+calc.displayErrorTime(1, 0.3, 4.5);
 
 
 return test;

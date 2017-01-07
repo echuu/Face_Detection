@@ -17,7 +17,7 @@ local function getEmpiricalError(Y_train, proj_min, alpha_t, F_T, t)
 	--]] 
 
 	print('in getEmpiricalError() function');
-	F, strong_classify = calculate.strongClass();
+	F, strong_classify = calculate.strongClass(alpha_t, proj_min, F_T, t);
 
 	-- create indicator matrix for incorrect class
 	err_vector = torch.ne(strong_classify, Y_train);
@@ -25,7 +25,7 @@ local function getEmpiricalError(Y_train, proj_min, alpha_t, F_T, t)
 	total_err  = torch.sum(err_vector);
 	err        = 1 / Y_train:size()[1] * total_err;
 
-	return F, err;
+	return err, F;
 end
 
 
@@ -41,7 +41,7 @@ local function strongClass(alpha_t, proj_min, F_T, t)
 
 	wt_proj = alpha_t * proj_min;
 	if t > 1 then
-		F_prev = F[t-1];
+		F_prev = F_T[t-1];
 	else
 		F_prev = 0;
 	end
@@ -54,10 +54,20 @@ local function strongClass(alpha_t, proj_min, F_T, t)
 	return strong_decision, F_t;
 end
 
+local function displayErrorTime(iter, error)
+
+	end_iter_time = os.time();
+	time = os.difftime(end_iter_time, iter_start);
+	print('iter '..iter.. '  '..
+		'empirical error: '.. error.. '\n'..
+		'\telapsed time:    '.. time.. ' seconds');
+end
+
 
 -------- function delcarations -------------------------------------------------
 calculate.getEmpiricalError = getEmpiricalError;
-calculate.strongClass      = strongClass;
+calculate.strongClass       = strongClass;
+calculate.displayErrorTime  = displayErrorTime;
 -------- end function delcarations ---------------------------------------------
 
 
