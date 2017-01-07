@@ -27,7 +27,7 @@
 local boost = {}
 
 local ext = require "externalFunctions";
-local classify = require "classifly.lua"; -- access kmeans() function
+local classify = require "classifly.lua"; -- access ll_classify() function
 
 --[[ ----- uncomment if want these to be global
 
@@ -74,7 +74,7 @@ local function adaboost(T)
 			face_mean[i], face_sd[i], nonface_mean[i], nonface_sd[i]);
 		
 		-- # classified incorrectly = sum(err_indicator)
-		err_indicator = torch.ne(Y_train, class); -- num_imgs x delta_size
+		err_indicator = torch.ne(Y_train, class); -- num_imgs x 1
 
 		-- error     = indicator:sum() / num_imgs; -- STORE THIS FOR USE IN ADA
 		-- print('iter '..i..' classifcation error: '..error);
@@ -107,7 +107,7 @@ local function adaboost(T)
 
 	-- below calculations can use the precomputed projections, just need
 	-- to multiply by alpha[t]
-	F_t          = torch.Tensor(T, num_imgs); -- weighted dot products 
+	F_T          = torch.Tensor(num_imgs, T); -- weighted dot products 
 	H_t          = torch.Tensor(T, num_imgs); -- (weighted) classifications
 	Err_t        = torch.Tensor(T, 1);        -- empirical error
 
@@ -125,7 +125,7 @@ local function adaboost(T)
 
 		ada_index[t] = min_ind;
 
-		-- update wts_prev, alpha (alpha)
+		-- update wts_prev, alpha
 		wts_prev = wts_cur;
 		alpha(t) = 0.5 * torch.log((1 - wt_err) / wt_err);
 
@@ -150,9 +150,6 @@ end
 
 ------- function declarations ---------------
  boost.adaboost = adaboost;
- boost.computeClassifications = computeClassifications;
 --------------- end function declarations ---
-
-
 
 return boost;

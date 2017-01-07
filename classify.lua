@@ -7,7 +7,7 @@
 	
 --]]
 
-local classify{}
+local classify = {}
 
 
 local function ll_classify(proj_i, m0, s0, m1, s1)
@@ -34,7 +34,7 @@ local function ll_classify(proj_i, m0, s0, m1, s1)
 	class              = torch.gt(ratio, 0); -- positive class.
 	class[class:eq(0)] = -1;                 -- negative class.
 
-
+	return class;
 
 end
 
