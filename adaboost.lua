@@ -42,9 +42,6 @@ local calc = require "calculate"
 
 --]]
 
-
-boost.adaboost()
-
 local function adaboost(T)
 	-- precompute the projections
 
@@ -63,21 +60,22 @@ local function adaboost(T)
 	elapsed_time = os.difftime(end_time, start_time);
 	print('Finished reading in data files. Total time: '..elapsed_time);
 
-	num_imgs     = proj:size()[1]; -- num of total images (# rows of proj)
-	err_mat      = torch.Tensor(num_imgs, proj:size()[2]);
+	total_imgs  = proj:size()[1]; -- num of total images (# rows of proj)
+	delta_size  = proj:size()[2];
+	err_mat   = torch.Tensor(total_imgs, delta_size);-- total_imgs x delta_size
 
 	-- precompute the classifications
 	start_time = os.time();
-	for i = 1, proj:size()[2] do
+	for i = 1, delta_size do
 		-- pass in i-th column of proj to classiifer
 		-- class: +1 if correct class vector holds correct class., else -1
 		class = classify.ll_classify(proj[{{}, {i}}],
 			face_mean[i], face_sd[i], nonface_mean[i], nonface_sd[i]);
 		
 		-- # classified incorrectly = sum(err_indicator)
-		err_indicator = torch.ne(Y_train, class); -- num_imgs x 1
+		err_indicator = torch.ne(Y_train, class); -- total_imgs x 1
 
-		-- error     = indicator:sum() / num_imgs; -- STORE THIS FOR USE IN ADA
+		-- error     = indicator:sum() / total_imgs; -- STORE THIS FOR USE IN ADA
 		-- print('iter '..i..' classifcation error: '..error);
 
 		err_mat[{{}, {i}}] = err_indicator;
@@ -91,11 +89,11 @@ local function adaboost(T)
 	---- BOOSTING STEP ---------------------------------------------------------
 
 	-- initialize current weights, previous weights for images
-	wts_cur  = torch.Tensor(1, num_imgs);
-	wts_prev = torch.Tensor(1, num_imgs);
+	wts_cur  = torch.Tensor(1, total_imgs);
+	wts_prev = torch.Tensor(1, total_imgs);
 
-	wts_cur  = 1 / num_imgs;
-	wts_prev = 1 / num_imgs;
+	wts_cur  = 1 / total_imgs;
+	wts_prev = 1 / total_imgs;
 
 
 	print('Begin adaboost');
@@ -108,8 +106,8 @@ local function adaboost(T)
 
 	-- below calculations can use the precomputed projections, just need
 	-- to multiply by alpha[t]
-	F_T          = torch.Tensor(num_imgs, T); -- weighted dot products 
-	--H_T          = torch.Tensor(T, num_imgs); -- (weighted) classifications
+	F_T          = torch.Tensor(total_imgs, T); -- weighted dot products 
+	--H_T          = torch.Tensor(T, total_imgs); -- (weighted) classifications
 	Z_T          = torch.Tensor(T, 1);        -- normalizing function
 	Err_T        = torch.Tensor(T, 1);        -- empirical error
 
@@ -125,19 +123,22 @@ local function adaboost(T)
 		min_err, min_ind = torch.min(wt_err, 2); -- 2 b/c weighted_err is
 											     -- row vector
 
+		print('Weak Classifier: '..min_ind..
+			' chosen to minimize weighted error');									     
+
 		ada_index[t] = min_ind;
 
 		-- update wts_prev, alpha
 		wts_prev = wts_cur;
-		alpha[t] = 0.5 * torch.log((1 - wt_err) / wt_err);
+		alpha[t] = 0.5 * torch.log((1 - min_err) / min_err);
 
 		-- calculate empirical error (minimize)
 		proj_i = proj[{{},{min_ind}}];
 		Err_T[t], F_T[{{},{t}}] = calc.getEmpiricalError(Y_train, proj_i,
 			alpha[t], F_T, t);
 
-		-- call update weight function for wts_cur, normalization contant
-		
+		-- call update weight function for wts_cur
+		wts_cur = calc.updateWeights(Y_train, F_T[{{},{t}}):t();
 
 		-- display empirical error for this iteration
 		displayErrorTime(t, Err_T[t], start_time);

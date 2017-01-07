@@ -55,16 +55,32 @@ local function strongClass(alpha_t, proj_min, F_T, t)
 end
 
 
-local function updateWeights(Y_train, F_t, wts_prev, Z_T)
+local function updateWeights(Y_train, F_t)
+	-- return updated weights for all data points (num_imgs x 1)
 
 	-- compute exponential portion
-	Y_F = F_t * Y_train:t();
-	
+	Y_F      = - torch.cmul(Y_train, F_t);
+	exp_Y_F  =   torch.exp(Y_F);
 
-	return wts_curr, Z;
+	Z        = calculate.normalize(exp_Y_F, Y_train.size()[1]);
+
+	wts_curr = 1 / Z * 1 / m * exp_Y_F;
+
+	return wts_curr;
 end
 
 
+local function normalize(exp_term, m)
+	-- caculate normalization coefficient, Z
+	-- exp_term (total_imgs x 1), matrix of exponential term for all images
+	-- m = total_imgs
+
+	Z      = exp_term:sum();
+	Z_norm = Z / m;
+
+	return Z_norm;
+
+end
 
 
 local function displayErrorTime(iter, error, start_time)
@@ -80,6 +96,8 @@ end
 -------- function delcarations -------------------------------------------------
 calculate.getEmpiricalError = getEmpiricalError;
 calculate.strongClass       = strongClass;
+calculate.updateWeights     = updateWeights;
+updateWeights.normalize     = normalize;
 calculate.displayErrorTime  = displayErrorTime;
 -------- end function delcarations ---------------------------------------------
 
