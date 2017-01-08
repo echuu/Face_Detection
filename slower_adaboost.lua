@@ -74,48 +74,28 @@ local function adaboost(proj, face_mean, nonface_mean,
 
 	total_imgs  = proj:size()[1]; -- num of total images (# rows of proj)
 	delta_size  = proj:size()[2];
-	err_mat     = torch.Tensor(total_imgs, delta_size);-- total_imgs x delta_size
+	--err_mat     = torch.Tensor(total_imgs, delta_size);
+	-- total_imgs x delta_size
 
 	-- precompute the classifications
-	start_time = os.time();
-	for i = 1, delta_size do
-		-- pass in i-th column of proj to classiifer
-		-- class: +1 if correct class vector holds correct class., else -1
-		class = classify.ll_classify(proj[{{}, {i}}],
-			torch.squeeze(face_mean[i]), torch.squeeze(face_sd[i]), 
-			torch.squeeze(nonface_mean[i]), torch.squeeze(nonface_sd[i]));
-
-		--print('size of class : '..class:size()[1]);
-		--print('size of Y_train : '..Y_train:size()[1]);
-		
-		-- # classified incorrectly = sum(err_indicator)
-		err_indicator = torch.ne(Y_train, class:double()); -- total_imgs x 1
-
-		-- error     = indicator:sum() / total_imgs; --STORE THIS FOR USE IN ADA
-		-- print('iter '..i..' classifcation error: '..error);
-
-		err_mat[{{}, {i}}] = err_indicator;
-	end
+	--start_time = os.time();
 	
-	end_time = os.time();
-	elapsed_time = os.difftime(end_time, start_time);
-	print('Finished classifications. Total time: '..elapsed_time);
+	
+	--end_time = os.time();
+	--elapsed_time = os.difftime(end_time, start_time);
+	--print('Finished classifications. Total time: '..elapsed_time);
 
 
 	---- BOOSTING STEP ---------------------------------------------------------
 
 	-- initialize current weights, previous weights for images
-	wts_cur  = torch.Tensor(1, total_imgs);
-	wts_prev = torch.Tensor(1, total_imgs);
-
-	wts_cur  = 1 / total_imgs;
-	wts_prev = 1 / total_imgs;
-
+	wts_cur  = torch.Tensor(1, total_imgs):fill(1 / total_imgs);
+	wts_prev = torch.Tensor(1, total_imgs):fill(1 / total_imgs);
 
 	print('Begin adaboost');
 	start_time = os.time();
 
-	weighted_err = torch.Tensor(1, delta_size);
+	wt_err       = torch.Tensor(1, delta_size);
 	alpha        = torch.Tensor(1, T);
 	ada_index    = torch.Tensor(1, T);
 	
@@ -128,37 +108,60 @@ local function adaboost(proj, face_mean, nonface_mean,
 	Err_T        = torch.Tensor(T, 1);        -- empirical error
 
 
-	---- free memory
+	--[[ free memory
 	face_mean		= nil;
 	nonface_mean	= nil;
 	face_sd			= nil;
 	nonface_sd		= nil;
-	---- free memory
+	--]]
 
 	for t = 1, T do
 		start_time = os.time();
 
+		for i = 1, delta_size do
+			-- pass in i-th column of proj to classiifer
+			-- class: +1 if correct class vector holds correct class., else -1
+			class = classify.ll_classify(proj[{{}, {i}}],
+				torch.squeeze(face_mean[i]), torch.squeeze(face_sd[i]), 
+				torch.squeeze(nonface_mean[i]), torch.squeeze(nonface_sd[i]));
+
+			--print('size of class : '..class:size()[1]);
+			--print('size of Y_train : '..Y_train:size()[1]);
+			
+			-- # classified incorrectly = sum(err_indicator)
+			err_indicator = torch.ne(Y_train, class:double()):double(); -- total_imgs x 1
+			--print('num rows in indicator: '..err_indicator:size()[1]);
+			--err_mat[{{}, {i}}] = err_indicator;
+			wt_err[{{},{i}}] = wts_cur * err_indicator;
+		end
+
+		--print('iter: '..t.. ' -- done calculating weighted error');
+
 		-- calculate weighted error
-		wt_err = wts_cur * err_mat; -- 1 x delta_size, wt_error correspond
+		--wt_err = wts_cur * err_mat; -- 1 x delta_size, wt_error correspond
 									      -- to each weak classifier
 
 		-- find weighted classifier with min. weighted error
 		min_err, min_ind = torch.min(wt_err, 2); -- 2 b/c weighted_err is
 											     -- row vector
 
+        min_err = torch.squeeze(min_err);
+        min_ind = torch.squeeze(min_ind);
+		--print(min_ind);
+		--print(min_err);									     
 		print('Weak Classifier: '..min_ind..
 			' chosen to minimize weighted error');									     
 
-		ada_index[t] = min_ind;
+		ada_index[{{},{t}}] = min_ind;
 
 		-- update wts_prev, alpha
 		wts_prev = wts_cur;
-		alpha[t] = 0.5 * torch.log((1 - min_err) / min_err);
+		alpha[{{},{t}}] = 0.5 * torch.log((1 - min_err) / min_err);
 
 		-- calculate empirical error (minimize)
 		proj_i = proj[{{},{min_ind}}];
 		Err_T[t], F_T[{{},{t}}] = calc.getEmpiricalError(Y_train, proj_i,
-			alpha[t], F_T, t);
+			alpha[{{},{t}}], F_T, t);
 
 		-- call update weight function for wts_cur
 		wts_cur = calc.updateWeights(Y_train, F_T[{{},{t}}]):t();
