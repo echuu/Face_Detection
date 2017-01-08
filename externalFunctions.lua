@@ -29,7 +29,7 @@ M.NUM_NONFACES  = 45356;
 
 
 -- debug
-M.DEBUG = 1;
+M.DEBUG = 0;
 
 
 ---------------------- END GLOBAL VARIABLE DECLARATION -------------------------
@@ -57,7 +57,7 @@ local function createTrain(pos, neg)
 
 end ------------------------------------------------------- end of createTrain()
 
-local function calcThreshold(delta, delta_size, faces, nonfaces)
+local function calcThreshold(delta, delta_size, faces, nonfaces, X)
 	-- delta : 36480 x 256
 	local face_mean, face_sd, nonface_mean, nonface_sd, pos, neg;
 
@@ -71,7 +71,7 @@ local function calcThreshold(delta, delta_size, faces, nonfaces)
 	pos          = torch.Tensor(M.NUM_FACES, 1):zero();
 	neg          = torch.Tensor(M.NUM_NONFACES, 1):zero();
 
-	print('dim of delta: ' .. delta:size()[1] .. ' x '.. delta:size()[2]);
+	-- print('dim of delta: ' .. delta:size()[1] .. ' x '.. delta:size()[2]);
 
 
 	start_time = os.time();

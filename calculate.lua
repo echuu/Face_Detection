@@ -16,7 +16,7 @@ local function getEmpiricalError(Y_train, proj_min, alpha_t, F_T, t)
 										   classification result
 	--]] 
 
-	print('in getEmpiricalError() function');
+	--print('in getEmpiricalError() function');
 	F, strong_classify = calculate.strongClass(alpha_t, proj_min, F_T, t);
 
 	-- create indicator matrix for incorrect class
@@ -39,7 +39,7 @@ local function strongClass(alpha_t, proj_min, F_T, t)
 			return the classification for all images (total_imgs x 1) -- +/-1
 	--]] 
 
-	wt_proj = alpha_t * proj_min;
+	wt_proj = torch.squeeze(alpha_t) * proj_min;
 	if t > 1 then
 		F_prev = F_T[t-1];
 	else
@@ -49,7 +49,7 @@ local function strongClass(alpha_t, proj_min, F_T, t)
 	F_t = F_prev + wt_proj;
 
 	-- strong_decision = sign(F_t) -- (total_imgs x 1)
-	strong_decision = sign(F_t);
+	strong_decision = torch.sign(F_t);
 
 	return strong_decision, F_t;
 end
@@ -62,7 +62,7 @@ local function updateWeights(Y_train, F_t)
 	Y_F      = - torch.cmul(Y_train, F_t);
 	exp_Y_F  =   torch.exp(Y_F);
 
-	Z        = calculate.normalize(exp_Y_F, Y_train.size()[1]);
+	Z        = calculate.normalize(exp_Y_F, Y_train:size()[1]);
 
 	wts_curr = 1 / Z * 1 / m * exp_Y_F;
 
@@ -97,7 +97,7 @@ end
 calculate.getEmpiricalError = getEmpiricalError;
 calculate.strongClass       = strongClass;
 calculate.updateWeights     = updateWeights;
-updateWeights.normalize     = normalize;
+calculate.normalize         = normalize;
 calculate.displayErrorTime  = displayErrorTime;
 -------- end function delcarations ---------------------------------------------
 
