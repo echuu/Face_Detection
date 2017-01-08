@@ -75,7 +75,7 @@ local function adaboost(T)
 		-- # classified incorrectly = sum(err_indicator)
 		err_indicator = torch.ne(Y_train, class); -- total_imgs x 1
 
-		-- error     = indicator:sum() / total_imgs; -- STORE THIS FOR USE IN ADA
+		-- error     = indicator:sum() / total_imgs; --STORE THIS FOR USE IN ADA
 		-- print('iter '..i..' classifcation error: '..error);
 
 		err_mat[{{}, {i}}] = err_indicator;

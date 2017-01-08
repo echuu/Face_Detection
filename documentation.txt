@@ -14,9 +14,9 @@ delta   			256 x delta_size			weak classifier matrix, each
 												classifier, each weak classifier
 												is 16 x 16 -> 256 x 1 vector	
 
-faces 				256 x 11838					matrix rep. of faces    (cols)
+faces 				11838 x 256					matrix rep. of faces    (cols)
 
-nonface   			256 x 45356					matrix rep. of nonfaces (cols)
+nonface   			45356 x 256					matrix rep. of nonfaces (cols)
 
 pos_X				11838 x delta_size			faces' * delta, projection of
 												each face onto each weak
