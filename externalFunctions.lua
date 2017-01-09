@@ -22,8 +22,8 @@ M.HAAR_3_COLS = 2;
 
 -- dimension of faces
 M.DIM           = 16;
-M.NUM_FACES     = 11838;
-M.NUM_NONFACES  = 45356;
+--M.NUM_FACES     = 1000;
+--M.NUM_NONFACES  = 4000;
 
 -- negatives
 
@@ -43,14 +43,12 @@ local function createTrain(pos, neg)
 
 	local Y, total_images;
 
-	total_images = M.NUM_FACES + M.NUM_NONFACES; -- 57194 total faces + nonfaces
+	total_images = pos:size()[1] + neg:size()[1];-- 57194 total faces + nonfaces
 
 	-- X = torch.Tensor(M.DIM * M.DIM, total_images);
 	Y = torch.Tensor(total_images, 1):fill(-1);
 
-	Y[{{1, M.NUM_FACES}}] = 1; -- faces <=> 1
-	--X[{{}, {1, M.NUM_FACES}}] = pos[{{}, {1, M.NUM_FACES}}];
-	--X[{{}, {M.NUM_FACES+1, total_images}}] = neg[{{}, {1, M.NUM_NONFACES}}];
+	Y[{{1, pos:size()[1]}}] = 1; -- faces <=> 1
 	-- add line to incorporate hard negatives
 
 	return Y;
@@ -68,8 +66,8 @@ local function calcThreshold(delta, delta_size, faces, nonfaces, X)
 	nonface_sd   = torch.FloatTensor(delta_size, 1):zero();
 
 	-- store result of dot product of each weak classifier of each face/nonface
-	pos          = torch.Tensor(M.NUM_FACES, 1):zero();
-	neg          = torch.Tensor(M.NUM_NONFACES, 1):zero();
+	pos          = torch.Tensor(faces:size()[1], 1):zero();
+	neg          = torch.Tensor(nonfaces:size()[1], 1):zero();
 
 	-- print('dim of delta: ' .. delta:size()[1] .. ' x '.. delta:size()[2]);
 

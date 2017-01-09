@@ -167,7 +167,7 @@ local function adaboost(proj, face_mean, nonface_mean,
 		wts_cur = calc.updateWeights(Y_train, F_T[{{},{t}}]):t();
 
 		-- display empirical error for this iteration
-		displayErrorTime(t, Err_T[t], start_time);
+		calc.displayErrorTime(t, Err_T[t], start_time);
 
 	end ------------------------ end adaboost iteration ------------------------
 	

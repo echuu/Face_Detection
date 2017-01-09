@@ -9,39 +9,45 @@
 
 --csv2tensor   =  require 'csv2tensor';
 local ext    =  require('externalFunctions');
-local boost  =  require('slower_adaboost');
+--local boost  =  require('slower_adaboost');
+local boost  =  require('adaboost');
 local debug  = 0;
 
+
+local subset_faces    = 1000;
+local subset_nonfaces = 4000;
+
 print('Begin reading in training data');
--- faces = csv2tensor.load("/home/wayne/Face_Detection/faces.csv");
-pathname = "/home/wayne/Desktop/data_files/";
-faces = torch.load(pathname..'faces.dat');
-faces = faces:t();
+--faces = csv2tensor.load("/home/wayne/Face_Detection/faces.csv");
+--nonfaces = csv2tensor.load("/home/wayne/Face_Detection/nonfaces.csv");
 
-
---nonfaces = csv2tensor.load("/home/wayne/Face_Detection/faces.csv");
-nonfaces = torch.load(pathname..'nonfaces.dat');
+--pathname = "/home/wayne/Desktop/data_files/";
+--faces    = torch.load(pathname..'faces.dat');
+faces    = torch.load('faces.dat');
+faces    = faces[{{},{1,subset_faces}}];
+faces    = faces:t();
+--nonfaces = torch.load(pathname..'nonfaces.dat');
+nonfaces = torch.load('nonfaces.dat');
+nonfaces = nonfaces[{{},{1,subset_nonfaces}}];
 nonfaces = nonfaces:t();
 
--- X = torch.cat(faces:t(), nonfaces:t(), 1); -- total_imgs x 256
 
-if debug == 1 then
+local num_faces = faces:size()[1];
+local num_nonfaces = nonfaces:size()[1];
+
+
+if debug == 0 then
 	numRows_faces = faces:size()[1];
 	numCols_faces = faces:size()[2];
-
-	print(numCols_faces .. ' of faces (columns)');
-	print(numRows_faces .. ' pixels each (rows)');
 
 	numRows_nonfaces = nonfaces:size()[1];
 	numCols_nonfaces = nonfaces:size()[2];
 
-	print(numCols_nonfaces .. ' of nonfaces (columns)');
-	print(numRows_nonfaces .. ' pixels each (rows)');
+	print(numRows_faces .. ' of faces (columns)');
+	print(numCols_faces .. ' pixels each (rows)');
 
-	--total_rows = X:size()[1];
-	--total_cols = X:size()[2];
-
-	--print('X : '..total_rows.. ' x '..total_cols);
+	print(numRows_nonfaces .. ' of nonfaces (columns)');
+	print(numCols_nonfaces .. ' pixels each (rows)');
 end
 
 -------- generate weak classifiers ---------------------------------------------
@@ -58,7 +64,7 @@ delta = ext.generateWC(dim, delta_size);
 
 
 ------ calculate threshold -----------------------------------------------------
-total_images = ext.NUM_FACES + ext.NUM_NONFACES;
+total_images = num_faces + num_nonfaces;
 
 --face_mean    = torch.FloatTensor(delta_size, 1):zero();
 --face_sd      = torch.FloatTensor(delta_size, 1):zero();
@@ -69,20 +75,24 @@ total_images = ext.NUM_FACES + ext.NUM_NONFACES;
 print('begin calculating threshold');
 start_time = os.time();
 
---[[
+
+--[[ 
 face_mean, face_sd, nonface_mean, nonface_sd, proj = ext.calcThreshold(delta, 
 	delta_size, faces, nonfaces);
 --]]
-pathname = "/home/wayne/Desktop/data_files/";
-proj         = torch.load(pathname..'projections.dat');
-face_mean    = torch.load(pathname..'face_mean.dat');
-nonface_mean = torch.load(pathname..'nonface_mean.dat');
-face_sd      = torch.load(pathname..'face_sd.dat');
-nonface_sd   = torch.load(pathname..'nonface_sd.dat');
-Y_train      = torch.load(pathname..'Y_train.dat');
 
+if debug == 0 then
+	pathname1  = "/home/wayne/Desktop/data_files/";
+	pathname = "";
+	proj         = torch.load(pathname..'projections.dat');
+	face_mean    = torch.load(pathname..'face_mean.dat');
+	nonface_mean = torch.load(pathname..'nonface_mean.dat');
+	face_sd      = torch.load(pathname..'face_sd.dat');
+	nonface_sd   = torch.load(pathname..'nonface_sd.dat');
+	Y_train      = torch.load(pathname..'Y_train.dat');
+end
 
-if debug == 1 then
+if debug == 2 then
 	print('rows of projection: '..proj:size()[1]);
 	print('cols of projection: '..proj:size()[2]);
 
@@ -96,9 +106,9 @@ end
 
 end_time = os.time();
 elapsed_time = os.difftime(end_time, start_time);
-print('total runtime: ' .. elapsed_time .. 'seconds');
+print('total runtime: ' .. elapsed_time .. ' seconds');
 
-if debug == 1 then
+if debug == 2 then
 	print('writing data files');
 	torch.save('face_mean.dat',     face_mean);
 	torch.save('face_sd.dat',       face_sd);
@@ -112,7 +122,7 @@ end
 
 ----- create training matrix ---------------------------------------------------
 
-if debug == 1 then
+if debug == 0 then
 	Y_train = ext.createTrain(faces, nonfaces);
 	print('Y_train: ' .. Y_train:size()[1] .. ' results');
 	torch.save('Y_train.dat', Y_train);
@@ -128,6 +138,6 @@ delta    = nil;
 
 
 ------- run adaboost -----------------
-T = 100;
+T = 10;
 boost.adaboost(proj, face_mean, nonface_mean, 
 	face_sd, nonface_sd, Y_train, T);

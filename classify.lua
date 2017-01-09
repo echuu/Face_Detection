@@ -40,7 +40,7 @@ local function ll_classify(proj_i, m0, s0, m1, s1)
 	--print('size of centered nonface: '..cent_nonfaces:size()[1]);
 
 	-- calculate ratios, take sign to classify
-	ratio = -1/2 * (cent_faces - cent_nonfaces + torch.log(s0) + torch.log(s1));
+	ratio = -0.5 * (cent_faces - cent_nonfaces + torch.log(s0) - torch.log(s1));
 	
 	-- caculate indicator matrix to find class. error
 	class              = torch.gt(ratio, 0):double(); -- positive class.

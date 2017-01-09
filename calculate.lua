@@ -17,7 +17,7 @@ local function getEmpiricalError(Y_train, proj_min, alpha_t, F_T, t)
 	--]] 
 
 	--print('in getEmpiricalError() function');
-	F, strong_classify = calculate.strongClass(alpha_t, proj_min, F_T, t);
+	strong_classify, F = calculate.strongClass(alpha_t, proj_min, F_T, t);
 
 	-- create indicator matrix for incorrect class
 	err_vector = torch.ne(strong_classify, Y_train);
@@ -39,17 +39,22 @@ local function strongClass(alpha_t, proj_min, F_T, t)
 			return the classification for all images (total_imgs x 1) -- +/-1
 	--]] 
 
+	--print('value of alpha: '..torch.squeeze(alpha_t));
+
 	wt_proj = torch.squeeze(alpha_t) * proj_min;
+	
+	--print(wt_proj[{{1,10},{}}])
+
 	if t > 1 then
-		F_prev = F_T[t-1];
+		F_prev = F_T[{{},{t-1}}];
 	else
 		F_prev = 0;
 	end
 
 	F_t = F_prev + wt_proj;
 
-	-- strong_decision = sign(F_t) -- (total_imgs x 1)
 	strong_decision = torch.sign(F_t);
+	print(strong_decision[{{1,10},{}}]);
 
 	return strong_decision, F_t;
 end
@@ -57,12 +62,13 @@ end
 
 local function updateWeights(Y_train, F_t)
 	-- return updated weights for all data points (num_imgs x 1)
+	m = Y_train:size()[1];
 
 	-- compute exponential portion
 	Y_F      = - torch.cmul(Y_train, F_t);
 	exp_Y_F  =   torch.exp(Y_F);
 
-	Z        = calculate.normalize(exp_Y_F, Y_train:size()[1]);
+	Z        = calculate.normalize(exp_Y_F, m);
 
 	wts_curr = 1 / Z * 1 / m * exp_Y_F;
 
@@ -76,6 +82,7 @@ local function normalize(exp_term, m)
 	-- m = total_imgs
 
 	Z      = exp_term:sum();
+	print('value of Z: '..Z);
 	Z_norm = Z / m;
 
 	return Z_norm;
@@ -85,10 +92,12 @@ end
 
 local function displayErrorTime(iter, error, start_time)
 
-	end_iter_time = os.time();
-	time = os.difftime(end_iter_time, iter_start);
+	err      = torch.squeeze(error);
+	end_time = os.time();
+	time     = os.difftime(end_time, start_time);
+
 	print('iter '..iter.. '  '..
-		'empirical error: '.. error.. '\n'..
+		'empirical error: '.. err.. '\n'..
 		'\telapsed time:    '.. time.. ' seconds');
 end
 

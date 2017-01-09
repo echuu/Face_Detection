@@ -39,7 +39,7 @@ for t = 1:T
         [h, ratio] = matrix_gauss_classify(ip, delta_face_means(i),...
             delta_face_sd(i), delta_nonface_means(i), delta_nonface_sd(i));
             
-        indicator = h ~= Y;   
+        indicator = h ~= Y;
             
         error = D_cur' * indicator;
         
