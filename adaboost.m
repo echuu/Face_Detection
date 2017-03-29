@@ -37,11 +37,12 @@ alpha         = zeros(T, 1); % weights for each of the weak classifers
 % number of iterations of adaboost
 T = 10;
 
-
-
+% pre-compute projections
 ip_mat = X * delta;
 class_matrix = zeros(m, delta_size);
 error_matrix = zeros(m, delta_size);
+
+% pre-compute classifications, error matrix
 for i = 1:delta_size
     ip = ip_mat(:, i);
     [h, ratio] = gauss_classify(ip, delta_face_means(i),...
@@ -51,8 +52,7 @@ for i = 1:delta_size
 
 end
 
-
-% ---------------------   begin adaboost  --------------------------------
+% ---------------------   begin adaboost  --------------------------------------
 tic
 for t = 1:T
     weighted_error = zeros(delta_size, 1);
@@ -60,6 +60,7 @@ for t = 1:T
     % find the lowest weighted error and its associated index
     [error, index] = findMinWtErr(D_cur, error_matrix, delta_size, DEBUG);
 
+    % calculate alpha -- used to weight the w.c. classifier chosen at iter t
     alpha(t) = 0.5 * log((1 - error) / error);
     min_ada_index(t) = index;
     
@@ -67,6 +68,8 @@ for t = 1:T
     
     chosen_class = class_matrix(:, min_ada_index(1:t));
     h = chosen_class(:, t);
+
+    % 'boosting' previous strong classifer with additional weighted w.c.
     F = F + alpha(t) .* (delta_reverse(min_ada_index(t)) * h);
     
     yh = exp(-Y .* F);
@@ -76,8 +79,5 @@ for t = 1:T
 
 end
 toc
-% ---------------------   end adaboost  ----------------------------------
-
-
-
-min_ada_index
+% ---------------------   end adaboost  ----------------------------------------
+min_ada_index % top T weak classifers used in creation of strong classifer
