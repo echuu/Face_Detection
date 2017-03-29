@@ -46,7 +46,7 @@ local function adaboost(proj, face_mean, nonface_mean,
 	face_sd, nonface_sd, Y_train, T)
 	-- precompute the projections
 
-	debug = 0;
+	debug = 2;
 	start_time = os.time();
 
 	
@@ -73,15 +73,18 @@ local function adaboost(proj, face_mean, nonface_mean,
 	--print('num cols in projection matrix: '..proj:size()[2]);
 
 	total_imgs  = proj:size()[1]; -- num of total images (# rows of proj)
-
-	print(total_imgs..' total images being used');
-	
 	delta_size  = proj:size()[2];
-	err_mat     = torch.Tensor(total_imgs, delta_size);-- total_imgs x delta_size
+
+	-- projection matrix: proj (total_imgs x delta_size)
+
+	-- store classifications
+	h_mat       = torch.DoubleTensor(total_imgs, delta_size); 
+	-- store class. errors
+	err_mat     = torch.DoubleTensor(total_imgs, delta_size); 
 
 	-- precompute the classifications
 	start_time = os.time();
-	if debug == 1 then
+	if debug == 2 then
 		for i = 1, delta_size do
 			-- pass in i-th column of proj to classiifer
 			-- class: +1 if correct class vector holds correct class., else -1
@@ -94,11 +97,14 @@ local function adaboost(proj, face_mean, nonface_mean,
 			--print('size of class : '..class:size()[1]);
 			--print('size of Y_train : '..Y_train:size()[1]);
 			
+			h_mat[{{}, {i}}] = class:double();
+			--print('size of class : '..class:size()[1]);
+			--print('size of Y_train : '..Y_train:size()[1]);
+			
 			-- # classified incorrectly = sum(err_indicator)
 			err_indicator = torch.ne(Y_train, class:double()):double();
 
-			-- error     = indicator:sum() / total_imgs; --STORE THIS FOR USE IN ADA
-			-- print('iter '..i..' classifcation error: '..error);
+			-- error     = indicator:sum() / total_imgs; 
 
 			err_mat[{{}, {i}}] = err_indicator;
 		end
@@ -109,11 +115,13 @@ local function adaboost(proj, face_mean, nonface_mean,
 
 		print('writing to file');
 		torch.save('error_matrix.dat', err_mat);
+		torch.save('h_mat.dat', h_mat);
 		print('finished writing to file');
+	else
+		-- after first time, read files form disk (faster)
+		err_mat = torch.load('error_matrix.dat');
+		h_mat   = torch.load('h_mat.dat');
 	end
-
-	err_mat = torch.load('error_matrix.dat');
-
 
 	---- BOOSTING STEP ---------------------------------------------------------
 
@@ -150,7 +158,7 @@ local function adaboost(proj, face_mean, nonface_mean,
 
 		-- calculate weighted error
 		wt_err = wts_cur * err_mat; -- 1 x delta_size, wt_error correspond
-									      -- to each weak classifier
+								    -- to each weak classifier
 
 		-- find weighted classifier with min. weighted error
 		min_err, min_ind = torch.min(wt_err, 2); -- 2 b/c weighted_err is
@@ -175,9 +183,10 @@ local function adaboost(proj, face_mean, nonface_mean,
 		print('value of alpha: '.. alpha_val);
 
 		-- calculate empirical error (minimize)
-		proj_i = proj[{{},{min_ind}}];
-		Err_T[t], F_T[{{},{t}}] = calc.getEmpiricalError(Y_train, proj_i,
-			alpha[{{},{t}}], F_T, t);
+		h_vec = h_mat[{{},{min_ind}}];
+
+		Err_T[t], F_T[{{},{t}}] = calc.getEmpiricalError(Y_train, h_vec,
+			alpha_val, F_T, t);
 
 		-- call update weight function for wts_cur
 		wts_cur = calc.updateWeights(Y_train, F_T[{{},{t}}]):t();

@@ -13,6 +13,7 @@ n = 1;
 step = 1;
 enlarge = 1;
 
+
 xSize = enlarge * features(1,1);
 ySize = features(1,2);
 for i = 0:step:dim

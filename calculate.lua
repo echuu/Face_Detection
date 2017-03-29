@@ -1,10 +1,11 @@
 local calculate = {}
 
 
-local function getEmpiricalError(Y_train, proj_min, alpha_t, F_T, t)
+local function getEmpiricalError(Y_train, h_min, alpha_t, F_T, t)
 	--[[  
 			Y_train     total_imgs x 1  -  true classifications (1, -1)
-			proj_min    total_imgs x 1  -  all images projected classifier with
+			h_min       total_imgs x 1  -  classification of all images using
+										   the weak clasisifer with
 									       min weighted error
 			alpha_t     1 x 1           -  the t-th calculated weight for class.
 			F_T         total_imgs x T  -  calculated F_values for all imgs,
@@ -17,7 +18,7 @@ local function getEmpiricalError(Y_train, proj_min, alpha_t, F_T, t)
 	--]] 
 
 	--print('in getEmpiricalError() function');
-	strong_classify, F = calculate.strongClass(alpha_t, proj_min, F_T, t);
+	strong_classify, F = calculate.strongClass(alpha_t, h_min, F_T, t);
 
 	-- create indicator matrix for incorrect class
 	err_vector = torch.ne(strong_classify, Y_train);
@@ -29,10 +30,10 @@ local function getEmpiricalError(Y_train, proj_min, alpha_t, F_T, t)
 end
 
 
-local function strongClass(alpha_t, proj_min, F_T, t)
+local function strongClass(alpha_t, h_min, F_T, t)
 	--[[  
 			alpha_t    1 x 1          -- true classifications (1, -1)
-			proj_min   total_imgs x 1 -- all images projected classifier with
+			h_min      total_imgs x 1 -- all images projected classifier with
 									  -- min weighted error
 			F_T        T x 1          -- elements, t+1, ..., T are zero
 
@@ -41,7 +42,7 @@ local function strongClass(alpha_t, proj_min, F_T, t)
 
 	--print('value of alpha: '..torch.squeeze(alpha_t));
 
-	wt_proj = torch.squeeze(alpha_t) * proj_min;
+	wt_proj = alpha_t * h_min;
 	
 	--print(wt_proj[{{1,10},{}}])
 
@@ -53,8 +54,9 @@ local function strongClass(alpha_t, proj_min, F_T, t)
 
 	F_t = F_prev + wt_proj;
 
+	print(F_t[{{1,20},{}}])
 	strong_decision = torch.sign(F_t);
-	print(strong_decision[{{1,10},{}}]);
+	--print(strong_decision[{{1,10},{}}]);
 
 	return strong_decision, F_t;
 end

@@ -11,11 +11,12 @@
 local ext    =  require('externalFunctions');
 --local boost  =  require('slower_adaboost');
 local boost  =  require('adaboost');
+
 local debug  = 0;
+local FIRST_TIME_RUN = 0;
 
-
-local subset_faces    = 1000;
-local subset_nonfaces = 4000;
+local subset_faces    = 800;
+local subset_nonfaces = 3200;
 
 print('Begin reading in training data');
 --faces = csv2tensor.load("/home/wayne/Face_Detection/faces.csv");
@@ -23,11 +24,12 @@ print('Begin reading in training data');
 
 --pathname = "/home/wayne/Desktop/data_files/";
 --faces    = torch.load(pathname..'faces.dat');
-faces    = torch.load('faces.dat');
+pathname = "/home/eric/data_files/";
+faces    = torch.load(pathname..'faces.dat');
 faces    = faces[{{},{1,subset_faces}}];
 faces    = faces:t();
 --nonfaces = torch.load(pathname..'nonfaces.dat');
-nonfaces = torch.load('nonfaces.dat');
+nonfaces = torch.load(pathname..'nonfaces.dat');
 nonfaces = nonfaces[{{},{1,subset_nonfaces}}];
 nonfaces = nonfaces:t();
 
@@ -73,17 +75,32 @@ total_images = num_faces + num_nonfaces;
 --proj         = torch.FloatTensor(total_images, delta_size):zero();
 
 print('begin calculating threshold');
-start_time = os.time();
 
 
---[[ 
-face_mean, face_sd, nonface_mean, nonface_sd, proj = ext.calcThreshold(delta, 
-	delta_size, faces, nonfaces);
---]]
 
-if debug == 0 then
-	pathname1  = "/home/wayne/Desktop/data_files/";
-	pathname = "";
+if FIRST_TIME_RUN == 1 then
+	start_time = os.time();
+
+	face_mean, face_sd, nonface_mean, nonface_sd, proj = ext.calcThreshold(delta, 
+		delta_size, faces, nonfaces);
+
+	end_time = os.time();
+	elapsed_time = os.difftime(end_time, start_time);
+	print('total runtime: ' .. elapsed_time .. ' seconds');
+
+	print('writing data files');
+
+	torch.save('face_mean.dat',     face_mean);
+	torch.save('face_sd.dat',       face_sd);
+	torch.save('nonface_mean.dat',  nonface_mean);
+	torch.save('nonface_sd.dat',    nonface_sd);
+	torch.save('projections.dat',   proj);
+
+	print('finished writing data files');
+elseif FIRST_TIME_RUN == 0 then
+	--pathname1    = "/home/wayne/Desktop/data_files/";
+	--pathname     = '/home/eric/Desktop/data_files/';
+	pathname = '';
 	proj         = torch.load(pathname..'projections.dat');
 	face_mean    = torch.load(pathname..'face_mean.dat');
 	nonface_mean = torch.load(pathname..'nonface_mean.dat');
@@ -92,7 +109,8 @@ if debug == 0 then
 	Y_train      = torch.load(pathname..'Y_train.dat');
 end
 
-if debug == 2 then
+
+if debug == 0 then
 	print('rows of projection: '..proj:size()[1]);
 	print('cols of projection: '..proj:size()[2]);
 
@@ -102,20 +120,6 @@ if debug == 2 then
 
 	print('nonface_mean size: ' .. nonface_mean:size()[1]);
 	print('nonface_sd size: ' .. nonface_sd:size()[1]);
-end
-
-end_time = os.time();
-elapsed_time = os.difftime(end_time, start_time);
-print('total runtime: ' .. elapsed_time .. ' seconds');
-
-if debug == 2 then
-	print('writing data files');
-	torch.save('face_mean.dat',     face_mean);
-	torch.save('face_sd.dat',       face_sd);
-	torch.save('nonface_mean.dat',  nonface_mean);
-	torch.save('nonface_sd.dat',    nonface_sd);
-	torch.save('projections.dat',   proj);
-	print('finished writing data files');
 end
 ------ finished calculating threshold ------------------------------------------
 
