@@ -21,6 +21,8 @@ else
 end
 
 %% adaboost initialization
+F = zeros(m, 1);
+Z = 0; % normalizing value
 D_cur  = zeros(m, 1);  % 4730 x 1
 D_last = zeros(m, 1);
 D_last(1:m) = 1 / m;   % initial weights (sum to 1)
@@ -34,11 +36,12 @@ alpha = zeros(T, 1);
 
 ip_mat = X * delta;
 class_matrix = zeros(m, delta_size);
+error_matrix = zeros(m, delta_size);
 for i = 1:delta_size
     ip = ip_mat(:, i);
     [h, ratio] = gauss_classify(ip, delta_face_means(i),...
         delta_face_sd(i), delta_nonface_means(i), delta_nonface_sd(i));
-        
+    error_matrix(:,i) = h ~= Y;
     class_matrix(:,i) = h;
 
 end
@@ -51,9 +54,7 @@ for t = 1:T
     delta_reverse = ones(delta_size, 1); 
     disp(['iter: ' num2str(t)]);
     for i = 1:delta_size   % iterate by column     
-        error = 0;
-        indicator = class_matrix(:,i) ~= Y;
-        error = D_cur' * indicator; % weighted_error
+        error = D_cur' * error_matrix(:,i); % weighted_error
         weighted_error(i, 1) = error;
     end
     
@@ -67,20 +68,11 @@ for t = 1:T
     delta_ada_chosen_index(t) = index;
     
     D_last = D_cur;
-    Z = 0;
-    F_all(1:m) = 0;
     
-
     chosen_class = class_matrix(:, delta_ada_chosen_index(1:t));
+    h = chosen_class(:, t);
+    F = F + alpha(t) .* (delta_reverse(delta_ada_chosen_index(t)) * h);
     
-    
-    F = zeros(m, 1);
-    for j = 1:t
-        h = chosen_class(:, j);
-        F = F + alpha(j) .* (delta_reverse(delta_ada_chosen_index(j)) * h);
-    end
-    F_all = F;
-
     yh = exp(-Y .* F);
     Z = sum(yh) / m;
     
