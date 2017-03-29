@@ -3,6 +3,7 @@
 % training set consists of: faces (1), non_faces (-1), negatives (-1)
 
 last_step = 0;
+DEBUG = 0;
 
 
 if last_step == 1
@@ -52,17 +53,8 @@ tic
 for t = 1:T
     weighted_error = zeros(delta_size, 1);
     delta_reverse = ones(delta_size, 1); 
-    disp(['iter: ' num2str(t)]);
-    for i = 1:delta_size   % iterate by column     
-        error = D_cur' * error_matrix(:,i); % weighted_error
-        weighted_error(i, 1) = error;
-    end
-    
-
-    [error, index] = min(weighted_error);
-
-    disp(['weak classifier: ' num2str(index) ' chosen with '...
-           ' weighted error: ' num2str(error)]);
+    % find the lowest weighted error and its associated index
+    [error, index] = findMinWtErr(D_cur, error_matrix, delta_size, DEBUG);
 
     alpha(t) = 0.5 * log((1 - error) / error);
     delta_ada_chosen_index(t) = index;
@@ -80,3 +72,5 @@ for t = 1:T
 
 end
 toc
+
+delta_ada_chosen_index
