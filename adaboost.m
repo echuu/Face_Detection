@@ -3,8 +3,8 @@
 % training set consists of: faces (1), non_faces (-1), negatives (-1)
 
 last_step = 0;
-DEBUG = 0;
 
+DEBUG = 0; % debug != 0 for extra iteration info
 
 if last_step == 1
     n_negs     = size(sub_images, 2);
@@ -22,18 +22,22 @@ else
 end
 
 %% adaboost initialization
-F = zeros(m, 1);
-Z = 0; % normalizing value
-D_cur  = zeros(m, 1);  % 4730 x 1
-D_last = zeros(m, 1);
-D_last(1:m) = 1 / m;   % initial weights (sum to 1)
-D_cur(1:m)  = 1 / m;    
+F = zeros(m, 1);             % store 'strong' classifications at each iteration
+Z = 0;                       % normalizing value
+D_cur  = zeros(m, 1);        % weights for current iteration
+D_prev = zeros(m, 1);        % weights for previous iteration
 
-% T = # of iterations of adaboost
+D_prev(1:m) = 1 / m;         % initial weights (sum to 1)
+D_cur(1:m)  = 1 / m;         % initial weights (sum to 1)
+
+min_ada_index = zeros(T, 1); % index associated with the w.c. with min. wt. err
+alpha         = zeros(T, 1); % weights for each of the weak classifers
+
+
+% number of iterations of adaboost
 T = 10;
 
-delta_ada_chosen_index = zeros(T, 1);
-alpha = zeros(T, 1);
+
 
 ip_mat = X * delta;
 class_matrix = zeros(m, delta_size);
@@ -48,7 +52,7 @@ for i = 1:delta_size
 end
 
 
-% begin adaboost
+% ---------------------   begin adaboost  --------------------------------
 tic
 for t = 1:T
     weighted_error = zeros(delta_size, 1);
@@ -57,13 +61,13 @@ for t = 1:T
     [error, index] = findMinWtErr(D_cur, error_matrix, delta_size, DEBUG);
 
     alpha(t) = 0.5 * log((1 - error) / error);
-    delta_ada_chosen_index(t) = index;
+    min_ada_index(t) = index;
     
-    D_last = D_cur;
+    D_prev = D_cur;
     
-    chosen_class = class_matrix(:, delta_ada_chosen_index(1:t));
+    chosen_class = class_matrix(:, min_ada_index(1:t));
     h = chosen_class(:, t);
-    F = F + alpha(t) .* (delta_reverse(delta_ada_chosen_index(t)) * h);
+    F = F + alpha(t) .* (delta_reverse(min_ada_index(t)) * h);
     
     yh = exp(-Y .* F);
     Z = sum(yh) / m;
@@ -72,5 +76,8 @@ for t = 1:T
 
 end
 toc
+% ---------------------   end adaboost  ----------------------------------
 
-delta_ada_chosen_index
+
+
+min_ada_index
