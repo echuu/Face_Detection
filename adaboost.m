@@ -2,25 +2,13 @@
 % boost weak classifiers
 % training set consists of: faces (1), non_faces (-1), negatives (-1)
 
-last_step = 0;
+DEBUG = 0; % debug != 0 for extra iteration info
 
-DEBUG = 1; % debug != 0 for extra iteration info
+m = n_faces + n_nonfaces; % 3200
+[X, Y] = createTrain(faces, nonfaces, 0, n_faces, n_nonfaces, 0); % X : m x 256
 
-if last_step == 1
-    n_negs     = size(sub_images, 2);
-    m = n_faces + n_nonfaces + n_negs;
-
-    % X --  256 x 4730
-    % Y -- 4730 x    1 (m x 1) -- correct classification of each image (+/-1)
-    [X, Y] = createTrain(faces, nonfaces, sub_images,...
-                          n_faces, n_nonfaces, n_negs);
-else
-    m = n_faces + n_nonfaces; % 3200
-    % X : m x 256
-    [X, Y] = createTrain(faces, nonfaces, 0, n_faces, n_nonfaces, 0);
-end
-
-%% adaboost initialization
+%% begin adaboost initialization
+T = 10;
 F = zeros(m, 1);             % store 'strong' classifications at each iteration
 Z = 0;                       % normalizing value
 D_cur  = zeros(m, 1);        % weights for current iteration
@@ -32,19 +20,19 @@ D_cur(1:m)  = 1 / m;         % initial weights (sum to 1)
 min_ada_index = zeros(T, 1); % index associated with the w.c. with min. wt. err
 alpha         = zeros(T, 1); % weights for each of the weak classifers
 
+class_matrix = zeros(m, delta_size); % store classifications for each image
+error_matrix = zeros(m, delta_size); % store errors for each classification
+%% end adaboost initialization
 
-% number of iterations of adaboost
-T = 10;
+
 
 % pre-compute projections
-ip_mat = X * delta;
-class_matrix = zeros(m, delta_size);
-error_matrix = zeros(m, delta_size);
+projections = X * delta;
 
 % pre-compute classifications, error matrix
 for i = 1:delta_size
-    ip = ip_mat(:, i);
-    [h, ratio] = gauss_classify(ip, delta_face_means(i),...
+    %ip = ip_mat(:, i);
+    [h, ~] = gauss_classify(projections(:,i), delta_face_means(i),...
         delta_face_sd(i), delta_nonface_means(i), delta_nonface_sd(i));
     error_matrix(:,i) = h ~= Y;
     class_matrix(:,i) = h;
@@ -54,7 +42,6 @@ end
 tic
 for t = 1:T
     weighted_error = zeros(delta_size, 1);
-    % delta_reverse = ones(delta_size, 1); 
     % find the lowest weighted error and its associated index
     [error, index] = findMinWtErr(D_cur, error_matrix, delta_size, DEBUG, t);
 
@@ -69,7 +56,7 @@ for t = 1:T
 
     % 'boosting' previous strong classifer with additional weighted w.c.
     F     =  F + alpha(t) .* h;
-    yh    =  exp(-Y .* F);
+    yh    =  exp(-Y .* F);   % exp(-alpha) if correct, exp(alpha) if incorrect
     Z     =  sum(yh) / m;
     D_cur =  1/Z * 1/m * yh; % update current weights
 
