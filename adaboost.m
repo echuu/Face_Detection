@@ -4,7 +4,7 @@
 
 last_step = 0;
 
-DEBUG = 0; % debug != 0 for extra iteration info
+DEBUG = 1; % debug != 0 for extra iteration info
 
 if last_step == 1
     n_negs     = size(sub_images, 2);
@@ -17,8 +17,7 @@ if last_step == 1
 else
     m = n_faces + n_nonfaces; % 3200
     % X : m x 256
-    [X, Y] = createTrain(faces, nonfaces, 0,...
-                          n_faces, n_nonfaces, 0);
+    [X, Y] = createTrain(faces, nonfaces, 0, n_faces, n_nonfaces, 0);
 end
 
 %% adaboost initialization
@@ -49,16 +48,15 @@ for i = 1:delta_size
         delta_face_sd(i), delta_nonface_means(i), delta_nonface_sd(i));
     error_matrix(:,i) = h ~= Y;
     class_matrix(:,i) = h;
-
 end
 
 % ---------------------   begin adaboost  --------------------------------------
 tic
 for t = 1:T
     weighted_error = zeros(delta_size, 1);
-    delta_reverse = ones(delta_size, 1); 
+    % delta_reverse = ones(delta_size, 1); 
     % find the lowest weighted error and its associated index
-    [error, index] = findMinWtErr(D_cur, error_matrix, delta_size, DEBUG);
+    [error, index] = findMinWtErr(D_cur, error_matrix, delta_size, DEBUG, t);
 
     % calculate alpha -- used to weight the w.c. classifier chosen at iter t
     alpha(t) = 0.5 * log((1 - error) / error);
@@ -70,12 +68,10 @@ for t = 1:T
     h = chosen_class(:, t);
 
     % 'boosting' previous strong classifer with additional weighted w.c.
-    F = F + alpha(t) .* (delta_reverse(min_ada_index(t)) * h);
-    
-    yh = exp(-Y .* F);
-    Z = sum(yh) / m;
-    
-    D_cur = 1/Z * 1/m * yh;
+    F     =  F + alpha(t) .* h;
+    yh    =  exp(-Y .* F);
+    Z     =  sum(yh) / m;
+    D_cur =  1/Z * 1/m * yh; % update current weights
 
 end
 toc

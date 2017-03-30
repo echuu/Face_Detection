@@ -1,4 +1,4 @@
-function [err, ind] = findMinWtErr(weights, error_matrix, dim, DEBUG)
+function [err, ind] = findMinWtErr(weights, error_matrix, dim, DEBUG, t)
 
 	min_ind = -1;
 	min_wt_err = 9999;
@@ -16,7 +16,7 @@ function [err, ind] = findMinWtErr(weights, error_matrix, dim, DEBUG)
 	ind = min_ind;
 
 	if DEBUG ~= 0
-	    disp(['iter: ' num2str(t)]);
-		disp(['weak classifier: ' num2str(ind) ' chosen with '...
-	           ' weighted error: ' num2str(err)]);
+	    disp(['iter: ' num2str(t)... 
+	    	  ' weak classifier: ' num2str(ind) ' -- '...
+	           'weighted error: ' num2str(err)]);
 	end
