@@ -57,6 +57,8 @@ end ------------------------------------------------------- end of createTrain()
 
 local function calcThreshold(delta, delta_size, faces, nonfaces, X)
 	-- delta : 36480 x 256
+	start_time = os.time();
+
 	local face_mean, face_sd, nonface_mean, nonface_sd, pos, neg;
 
 	face_mean    = torch.FloatTensor(delta_size, 1):zero();
@@ -104,6 +106,11 @@ local function calcThreshold(delta, delta_size, faces, nonfaces, X)
 
 	--- store delta * faces, delta * nonfaces, this is used in training step
 	proj = torch.cat(pos_X, neg_X, 1);
+
+
+	end_time = os.time();
+	elapsed_time = os.difftime(end_time, start_time);
+	print('threshold calculation runtime: ' .. elapsed_time .. ' seconds');
 	
 	return face_mean, face_sd, nonface_mean, nonface_sd, proj;
 

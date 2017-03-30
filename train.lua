@@ -9,8 +9,8 @@
 
 --csv2tensor   =  require 'csv2tensor';
 local ext    =  require('externalFunctions');
---local boost  =  require('slower_adaboost');
 local boost  =  require('adaboost');
+local load   = require('load_data')
 
 local debug  = 0;
 local FIRST_TIME_RUN = 0;
@@ -22,13 +22,10 @@ print('Begin reading in training data');
 --faces = csv2tensor.load("/home/wayne/Face_Detection/faces.csv");
 --nonfaces = csv2tensor.load("/home/wayne/Face_Detection/nonfaces.csv");
 
---pathname = "/home/wayne/Desktop/data_files/";
---faces    = torch.load(pathname..'faces.dat');
 pathname = "/home/eric/data_files/";
 faces    = torch.load(pathname..'faces.dat');
 faces    = faces[{{},{1,subset_faces}}];
 faces    = faces:t();
---nonfaces = torch.load(pathname..'nonfaces.dat');
 nonfaces = torch.load(pathname..'nonfaces.dat');
 nonfaces = nonfaces[{{},{1,subset_nonfaces}}];
 nonfaces = nonfaces:t();
