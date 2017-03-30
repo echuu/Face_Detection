@@ -6,25 +6,14 @@ DEBUG = 0; % debug != 0 for extra iteration info
 
 m = n_faces + n_nonfaces; % 3200
 [X, Y] = createTrain(faces, nonfaces, 0, n_faces, n_nonfaces, 0); % X : m x 256
-
-%% begin adaboost initialization
 T = 10;
-F = zeros(m, 1);             % store 'strong' classifications at each iteration
-Z = 0;                       % normalizing value
-D_cur  = zeros(m, 1);        % weights for current iteration
-D_prev = zeros(m, 1);        % weights for previous iteration
+%% begin adaboost initialization
+[F, Z, D_cur, D_prev,...
+          min_ada_index, alpha, ...
+          class_matrix, error_matrix] = ...
+    initializeAdaBoost(m, T, delta_size);
 
-D_prev(1:m) = 1 / m;         % initial weights (sum to 1)
-D_cur(1:m)  = 1 / m;         % initial weights (sum to 1)
-
-min_ada_index = zeros(T, 1); % index associated with the w.c. with min. wt. err
-alpha         = zeros(T, 1); % weights for each of the weak classifers
-
-class_matrix = zeros(m, delta_size); % store classifications for each image
-error_matrix = zeros(m, delta_size); % store errors for each classification
 %% end adaboost initialization
-
-
 
 % pre-compute projections
 projections = X * delta;
