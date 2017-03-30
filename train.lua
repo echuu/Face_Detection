@@ -10,10 +10,10 @@
 --csv2tensor   =  require 'csv2tensor';
 local ext    =  require('externalFunctions');
 local boost  =  require('adaboost');
-local load   = require('load_data')
+local load   = require('load_data');
 
 local debug  = 0;
-local FIRST_TIME_RUN = 0;
+local FIRST_TIME_RUN = 1;
 
 local subset_faces    = 800;
 local subset_nonfaces = 3200;
@@ -85,15 +85,16 @@ if FIRST_TIME_RUN == 1 then
 	elapsed_time = os.difftime(end_time, start_time);
 	print('total runtime: ' .. elapsed_time .. ' seconds');
 
+	--[[
 	print('writing data files');
-
 	torch.save('face_mean.dat',     face_mean);
 	torch.save('face_sd.dat',       face_sd);
 	torch.save('nonface_mean.dat',  nonface_mean);
 	torch.save('nonface_sd.dat',    nonface_sd);
 	torch.save('projections.dat',   proj);
-
 	print('finished writing data files');
+	--]]
+	
 elseif FIRST_TIME_RUN == 0 then
 	--pathname1    = "/home/wayne/Desktop/data_files/";
 	--pathname     = '/home/eric/Desktop/data_files/';
@@ -108,15 +109,9 @@ end
 
 
 if debug == 0 then
-	print('rows of projection: '..proj:size()[1]);
-	print('cols of projection: '..proj:size()[2]);
-
-
-	print('face_mean size: ' .. face_mean:size()[1]);
-	print('face_sd size: ' .. face_sd:size()[1]);
-
-	print('nonface_mean size: ' .. nonface_mean:size()[1]);
-	print('nonface_sd size: ' .. nonface_sd:size()[1]);
+	for i = 1, 50 do
+		print('face mean '.. i.. ': '..face_mean[i]);
+	end
 end
 ------ finished calculating threshold ------------------------------------------
 
@@ -140,5 +135,6 @@ delta    = nil;
 
 ------- run adaboost -----------------
 T = 10;
-boost.adaboost(proj, face_mean, nonface_mean, 
-	face_sd, nonface_sd, Y_train, T);
+
+--boost.adaboost(proj, face_mean, nonface_mean, 
+--	face_sd, nonface_sd, Y_train, T);

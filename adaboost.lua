@@ -113,10 +113,10 @@ local function adaboost(proj, face_mean, nonface_mean,
 		elapsed_time = os.difftime(end_time, start_time);
 		print('Finished classifications. Total time: '..elapsed_time);
 
-		print('writing to file');
-		torch.save('error_matrix.dat', err_mat);
-		torch.save('h_mat.dat', h_mat);
-		print('finished writing to file');
+		--print('writing to file');
+		--torch.save('error_matrix.dat', err_mat);
+		--orch.save('h_mat.dat', h_mat);
+		--print('finished writing to file');
 	else
 		-- after first time, read files form disk (faster)
 		err_mat = torch.load('error_matrix.dat');
