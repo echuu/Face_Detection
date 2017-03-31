@@ -55,7 +55,7 @@ local function createTrain(pos, neg)
 
 end ------------------------------------------------------- end of createTrain()
 
-local function calcThreshold(delta, delta_size, faces, nonfaces, X)
+local function calcThreshold(delta, delta_size, faces, nonfaces)
 	-- delta : 36480 x 256
 	start_time = os.time();
 
@@ -78,6 +78,8 @@ local function calcThreshold(delta, delta_size, faces, nonfaces, X)
 
 	-- project each face onto every weak classifier	
 	pos_X     = faces * delta;    -- 11838 x 36480 (rows <=> faces)
+	--print(faces[{{1,20}, {1,15}}]);
+	-- print('dim of face projections: ' .. pos_X:size()[1] .. ' x '.. pos_X:size()[2]);
 	-- calculate mean of each column (projections of every face on wk class.)
 	face_mean = torch.mean(pos_X, 1):t();
 	face_sd   = torch.std(pos_X, 1):t();
@@ -91,8 +93,10 @@ local function calcThreshold(delta, delta_size, faces, nonfaces, X)
 	end
 
 	neg_X         = nonfaces * delta; -- 45356 x 36480
+	--print('dim of nonface projections: ' .. neg_X:size()[1] .. ' x '.. neg_X:size()[2]);
+
 	nonface_mean  = torch.mean(neg_X, 1):t();
-	nonface_std   = torch.std(neg_X, 1):t();
+	nonface_sd   = torch.std(neg_X, 1):t();
 
 	if M.DEBUG == 1 then
 		print('displaying first 50 values of nonface_mean:');

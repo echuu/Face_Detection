@@ -10,6 +10,25 @@
 local classify = {}
 
 
+local function findMinWtErr(weights, error_matrix, dim, DEBUG, t)
+
+	min_ind    = -1;
+	min_wt_err = 9999;
+
+	error_vec = weights:t() * error_matrix;
+
+	for i = 1, dim do
+		val = torch.squeeze(error_vec[{i}])
+		if  val < min_wt_err then
+			min_wt_err = val;
+			min_ind = i;
+		end
+	end
+
+	return min_wt_err, min_ind;
+end
+
+
 local function ll_classify(proj_i, m0, s0, m1, s1)
 	--[[ 
 		element-wise intuition: 
@@ -22,15 +41,6 @@ local function ll_classify(proj_i, m0, s0, m1, s1)
 	--]]
 
 	-- center the projections w.r.t. faces, nonfaces
-	--[[
-		total_imgs = proj_i:size()[1];
-		m0_vec = torch.Tensor(total_imgs, 1):fill(m0);
-		--s0_vec = torch.Tensor(total_imgs, 1):fill(s0);
-		m1_vec = torch.Tensor(total_imgs, 1):fill(m1);
-		--s1_vec = torch.Tensor(total_imgs, 1):fill(s1);
-	--]]
-
-	--print('ll-classify: size of projection: '..proj_i:size()[1]);
 
 	cent_faces     = torch.pow((proj_i - m0), 2) / s0^2;
 	cent_nonfaces  = torch.pow((proj_i - m1), 2) / s1^2;
@@ -54,6 +64,7 @@ end
 
 --------function declarations -------------------------
 classify.ll_classify = ll_classify;
+classify.findMinWtErr = findMinWtErr;
 ------------------- end function declarations ---------
 
 
