@@ -2,14 +2,23 @@ local ld    = require('load_data');
 local ext   = require('externalFunctions');
 local g     = require('common_defs');
 local class = require('classify.lua');
+csv2tensor  = require('csv2tensor');
 
-h_mat   = torch.DoubleTensor(g.total_imgs, g.delta_size);
-err_mat = torch.DoubleTensor(g.total_imgs, g.delta_size);
+
+FIRST_TIME = 1;
+
+--h_mat   = torch.DoubleTensor(g.total_imgs, g.delta_size);
+--err_mat = torch.DoubleTensor(g.total_imgs, g.delta_size);
 
 -- faces, nonfaces stored as rows
-faces    = ld.importFaces(g.pathname, g.subset_faces);       --  800 x 256
-nonfaces = ld.importNonfaces(g.pathname, g.subset_nonfaces); -- 3200 x 256
-Y_train  = ext.createTrain(faces, nonfaces);                 -- 4000 x 1 
+faces    = ld.importFaces(g.pathname, g.subset_faces, 0);       --  800 x 256
+nonfaces = ld.importNonfaces(g.pathname, g.subset_nonfaces, 0); -- 3200 x 256
+X, Y_train  = ext.createTrain(faces, nonfaces);                    -- 4000 x 1
+
+
+--print(faces:size());
+--print(nonfaces:size());
+--print(Y_train:size());
 
 -- generate weak classifiers
 -- each weak classifiers stored as a column vector
@@ -24,23 +33,24 @@ delta = ext.generateWC(g.dim, g.delta_size);
 	proj         (total_imgs x delta_size) -- used for classification
 --]]
 
---[[ first time run only
+if FIRST_TIME == 1 then 
+	face_mean, face_sd, nonface_mean, nonface_sd = ext.calcThreshold(delta,
+		g.delta_size, faces, nonfaces);
 
-face_mean, face_sd, nonface_mean, nonface_sd, proj = ext.calcThreshold(delta,
-	g.delta_size, faces, nonfaces);
+	torch.save('face_mean.dat', face_mean);
+	torch.save('face_sd.dat', face_sd);
+	torch.save('nonface_mean.dat', nonface_mean);
+	torch.save('nonface_sd.dat', nonface_sd);
+else
+	face_mean    = torch.load('face_mean.dat');
+	face_sd      = torch.load('face_sd.dat');
+	nonface_mean = torch.load('nonface_mean.dat');
+	nonface_sd   = torch.load('nonface_sd.dat');
+end
 
-torch.save('face_mean.dat', face_mean);
-torch.save('face_sd.dat', face_sd);
-torch.save('nonface_mean.dat', nonface_mean);
-torch.save('nonface_sd.dat', nonface_sd);
+-- precompute projections for classification
+proj = X * delta;
 torch.save('proj.dat', proj);
---]]
-
-face_mean = torch.load('face_mean.dat');
-face_sd = torch.load('face_sd.dat');
-nonface_mean = torch.load('nonface_mean.dat');
-nonface_sd = torch.load('nonface_sd.dat');
-proj = torch.load('proj.dat');
 
 
 --------------------- free memory ----------------------------------------------
@@ -54,7 +64,7 @@ delta    = nil;
 
 --
 
-if 1 == 0 then
+if FIRST_TIME == 2 then
 	start_time = os.time();
 	for i = 1, g.delta_size do
 
@@ -74,6 +84,9 @@ else
 	print("Reading in classification matrix and error matrix");
 	h_mat   = torch.load('classification_matrix.dat');
 	err_mat = torch.load('error_matrix.dat');
+
+	--h_mat   = csv2tensor.load('h_mat.csv');
+	--err_mat = csv2tensor.load('err_mat.csv');
 end
 
 -- can free up proj matrix
@@ -92,11 +105,13 @@ alpha = torch.Tensor(T, 1):zero();
 
 ------ begin adaboost ----------------------------------------------------------
 for t = 1, T do
-	weighted_error = torch.Tensor(g.delta_size, 1):zero();
+	-- weighted_error = torch.Tensor(g.delta_size, 1):zero();
 
 	error, index = class.findMinWtErr(D_cur, err_mat, g.delta_size, 0, t);
 	print('wk class: '.. index..' error: '..error);
-	alpha[t]     = -0.5 * torch.log((1 - error) / error);
+
+	alpha[t]     = 0.5 * torch.log((1 - error) / error);
+	print(torch.squeeze(alpha[t]));
 
 	min_ada_index[t] = index;
 
@@ -111,6 +126,8 @@ for t = 1, T do
 	Z     = torch.sum(yh) * inv_total;
 
 	D_cur = 1/Z * inv_total * yh;
+
+	-- print(D_cur[{{1,10},{}}]);
 end
 ------ end adaboost ------------------------------------------------------------
 print(min_ada_index);

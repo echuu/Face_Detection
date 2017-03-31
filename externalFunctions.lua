@@ -51,7 +51,10 @@ local function createTrain(pos, neg)
 	Y[{{1, pos:size()[1]}}] = 1; -- faces <=> 1
 	-- add line to incorporate hard negatives
 
-	return Y;
+	X = torch.cat(pos, neg, 1);
+
+
+	return X, Y;
 
 end ------------------------------------------------------- end of createTrain()
 
@@ -78,9 +81,8 @@ local function calcThreshold(delta, delta_size, faces, nonfaces)
 
 	-- project each face onto every weak classifier	
 	pos_X     = faces * delta;    -- 11838 x 36480 (rows <=> faces)
-	--print(faces[{{1,20}, {1,15}}]);
-	-- print('dim of face projections: ' .. pos_X:size()[1] .. ' x '.. pos_X:size()[2]);
-	-- calculate mean of each column (projections of every face on wk class.)
+	faces = nil;
+
 	face_mean = torch.mean(pos_X, 1):t();
 	face_sd   = torch.std(pos_X, 1):t();
 
@@ -93,7 +95,7 @@ local function calcThreshold(delta, delta_size, faces, nonfaces)
 	end
 
 	neg_X         = nonfaces * delta; -- 45356 x 36480
-	--print('dim of nonface projections: ' .. neg_X:size()[1] .. ' x '.. neg_X:size()[2]);
+	nonfaces = nil;
 
 	nonface_mean  = torch.mean(neg_X, 1):t();
 	nonface_sd   = torch.std(neg_X, 1):t();
@@ -110,7 +112,8 @@ local function calcThreshold(delta, delta_size, faces, nonfaces)
 
 	--- store delta * faces, delta * nonfaces, this is used in training step
 	proj = torch.cat(pos_X, neg_X, 1);
-
+	posX = nil;
+	negX = nil;
 
 	end_time = os.time();
 	elapsed_time = os.difftime(end_time, start_time);

@@ -1,3 +1,8 @@
+faces.csv
+nonfaces.csv
+err_mat.csv
+h_mat.csv
+train.csv
 proj.dat
 face_sd.dat
 face_mean.dat

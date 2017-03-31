@@ -1,20 +1,31 @@
 local load_data = {}
 
+csv2tensor = require('csv2tensor');
 
-local function importFaces(pathname, num_faces)
+local function importFaces(pathname, num_faces, csv)
+
+	--local csv2tensor = require('csv2tensor');
 
 	print("Importing faces");
-	faces = torch.load(pathname.."faces.dat");
+	if csv == 0 then
+		faces = torch.load(pathname.."faces.dat");
+	else
+		faces = csv2tensor.load(pathname.."faces.csv");
+	end
 	faces = faces[{{}, {1, num_faces}}];
 	faces = faces:t();
 
 	return faces;
 end
 
-local function importNonfaces(pathname, num_nonfaces)
+local function importNonfaces(pathname, num_nonfaces, csv)
 
 	print("Importing nonfaces");
-	nonfaces = torch.load(pathname.."nonfaces.dat");
+	if csv == 0 then
+		nonfaces = torch.load(pathname.."nonfaces.dat");
+	else
+		nonfaces = csv2tensor.load(pathname.."nonfaces.csv");
+	end
 	nonfaces = nonfaces[{{}, {1, num_nonfaces}}];
 	nonfaces = nonfaces:t();
 

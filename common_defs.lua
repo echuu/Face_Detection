@@ -11,4 +11,6 @@ g.delta_size      = 36480;
 g.total_imgs      = g.subset_faces + g.subset_nonfaces;
 g.pathname        = "/home/eric/data_files/";
 
+g.csvpath         = "/home/eric/Face_Detection/";
+
 return g;

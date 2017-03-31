@@ -13,3 +13,7 @@ function [X, Y] = createTrain(faces, nonfaces, sub_images,...
 
 	X = [faces; nonfaces];
 
+	csvwrite('train.csv', X);
+
+
+

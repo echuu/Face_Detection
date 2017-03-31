@@ -5,6 +5,11 @@ DEBUG = 0; % debug != 0 for extra iteration info
 
 m = n_faces + n_nonfaces; % 3200
 [X, Y] = createTrain(faces, nonfaces, 0, n_faces, n_nonfaces, 0); % X : m x 256
+
+
+%csvwrite('faces.csv', faces);
+%csvwrite('nonfaces.csv', nonfaces);
+
 T = 10;
 %% begin adaboost initialization
 [F, Z, D_cur, D_prev,...
@@ -26,10 +31,13 @@ for i = 1:delta_size
     class_matrix(:,i) = h;
 end
 
+%csvwrite('h_mat.csv', class_matrix);
+%csvwrite('err_mat.csv', error_matrix);
+
 % ---------------------   begin adaboost  --------------------------------------
 tic
 for t = 1:T
-    weighted_error = zeros(delta_size, 1);
+    % weighted_error = zeros(delta_size, 1);
     % find the lowest weighted error and its associated index
     [error, index] = findMinWtErr(D_cur, error_matrix, delta_size, DEBUG, t);
 
