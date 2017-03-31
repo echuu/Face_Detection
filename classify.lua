@@ -15,10 +15,10 @@ local function findMinWtErr(weights, error_matrix, dim, DEBUG, t)
 	min_ind    = -1;
 	min_wt_err = 9999;
 
-	error_vec = weights:t() * error_matrix;
+	error_vec = weights:t() * error_matrix; -- 1 x delta_size
 
 	for i = 1, dim do
-		val = torch.squeeze(error_vec[{i}])
+		val = torch.squeeze(error_vec[{{1},{i}}])
 		if  val < min_wt_err then
 			min_wt_err = val;
 			min_ind = i;

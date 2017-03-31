@@ -1,5 +1,4 @@
 % adaboost.m
-% boost weak classifiers
 % training set consists of: faces (1), non_faces (-1), negatives (-1)
 
 DEBUG = 0; % debug != 0 for extra iteration info
@@ -40,8 +39,10 @@ for t = 1:T
     
     D_prev = D_cur;
     
-    chosen_class = class_matrix(:, min_ada_index(1:t));
-    h = chosen_class(:, t);
+    % chosen_class = class_matrix(:, min_ada_index(1:t));
+    % h = chosen_class(:, t);
+
+    h = class_matrix(:,index);
 
     % 'boosting' previous strong classifer with additional weighted w.c.
     F     =  F + alpha(t) .* h;
