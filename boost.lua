@@ -2,13 +2,14 @@ local ld    = require('load_data');
 local ext   = require('externalFunctions');
 local g     = require('common_defs');
 local class = require('classify.lua');
+local calc  = require('calculate.lua');
 csv2tensor  = require('csv2tensor');
 
 
 FIRST_TIME = 1;
 
---h_mat   = torch.DoubleTensor(g.total_imgs, g.delta_size);
---err_mat = torch.DoubleTensor(g.total_imgs, g.delta_size);
+h_mat   = torch.DoubleTensor(g.total_imgs, g.delta_size);
+err_mat = torch.DoubleTensor(g.total_imgs, g.delta_size);
 
 -- faces, nonfaces stored as rows
 faces    = ld.importFaces(g.pathname, g.subset_faces, 0);       --  800 x 256
@@ -50,7 +51,8 @@ end
 
 -- precompute projections for classification
 proj = X * delta;
-torch.save('proj.dat', proj);
+--torch.save('proj.dat', proj);
+--proj = torch.load('proj.dat');
 
 
 --------------------- free memory ----------------------------------------------
@@ -64,8 +66,8 @@ delta    = nil;
 
 --
 
-if FIRST_TIME == 2 then
-	start_time = os.time();
+if FIRST_TIME == 1 then
+	--start_time = os.time();
 	for i = 1, g.delta_size do
 
 		h_mat[{{}, {i}}] = class.ll_classify(proj[{{}, {i}}],
@@ -77,9 +79,9 @@ if FIRST_TIME == 2 then
 	print("Classifications complete");
 	torch.save('classification_matrix.dat', h_mat);
 	torch.save('error_matrix.dat', err_mat);
-	end_time = os.time();
-	elapsed_time = os.difftime(end_time, start_time);
-	print('Finished classifications. Total time: '..elapsed_time);
+	--end_time = os.time();
+	--elapsed_time = os.difftime(end_time, start_time);
+	--print('Finished classifications. Total time: '..elapsed_time);
 else
 	print("Reading in classification matrix and error matrix");
 	h_mat   = torch.load('classification_matrix.dat');
@@ -91,7 +93,7 @@ end
 
 -- can free up proj matrix
 
-T = 10;
+T = 150;
 local inv_total = 1 / g.total_imgs;
 
 F = torch.Tensor(g.total_imgs, 1):zero();	-- strong classifier
@@ -108,10 +110,10 @@ for t = 1, T do
 	-- weighted_error = torch.Tensor(g.delta_size, 1):zero();
 
 	error, index = class.findMinWtErr(D_cur, err_mat, g.delta_size, 0, t);
-	print('wk class: '.. index..' error: '..error);
+	--print('wk class: '.. index..' error: '..error);
 
 	alpha[t]     = 0.5 * torch.log((1 - error) / error);
-	print(torch.squeeze(alpha[t]));
+	--print(torch.squeeze(alpha[t]));
 
 	min_ada_index[t] = index;
 
@@ -127,7 +129,12 @@ for t = 1, T do
 
 	D_cur = 1/Z * inv_total * yh;
 
+
+	-- calculate empirical error:
+	calc.classError(Y_train, F);
+
 	-- print(D_cur[{{1,10},{}}]);
 end
+
 ------ end adaboost ------------------------------------------------------------
-print(min_ada_index);
+--print(min_ada_index);

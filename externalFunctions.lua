@@ -111,7 +111,6 @@ local function calcThreshold(delta, delta_size, faces, nonfaces)
 	
 
 	--- store delta * faces, delta * nonfaces, this is used in training step
-	proj = torch.cat(pos_X, neg_X, 1);
 	posX = nil;
 	negX = nil;
 
@@ -120,7 +119,7 @@ local function calcThreshold(delta, delta_size, faces, nonfaces)
 	print('threshold calculation runtime: ' .. elapsed_time .. ' seconds');
 
 	return torch.squeeze(face_mean), torch.squeeze(face_sd),
-	 		torch.squeeze(nonface_mean), torch.squeeze(nonface_sd), proj;
+	 		torch.squeeze(nonface_mean), torch.squeeze(nonface_sd);
 
 end ------------------------------------------------ end of calculateThreshold()
 

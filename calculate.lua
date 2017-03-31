@@ -1,6 +1,18 @@
 local calculate = {}
 
 
+local function classError(Y_train, strong_class)
+
+	class     = torch.sign(strong_class); 
+	indicator = torch.ne(Y_train, class);
+	error     = torch.sum(indicator) / Y_train:size()[1];
+
+
+	print('classification error: '..error);
+
+	return error;
+end
+
 local function getEmpiricalError(Y_train, h_min, alpha_t, F_T, t)
 	--[[  
 			Y_train     total_imgs x 1  -  true classifications (1, -1)
@@ -110,6 +122,7 @@ calculate.strongClass       = strongClass;
 calculate.updateWeights     = updateWeights;
 calculate.normalize         = normalize;
 calculate.displayErrorTime  = displayErrorTime;
+calculate.classError        = classError;
 -------- end function delcarations ---------------------------------------------
 
 
