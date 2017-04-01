@@ -3,6 +3,10 @@
 
 DEBUG = 0; % debug != 0 for extra iteration info
 
+% when faces, nonfaces come into adaboost, they have already been transposed
+% faces    -- n_faces x 256
+% nonfaces -- n_nonfaces x 256
+
 m = n_faces + n_nonfaces; % 3200
 [X, Y] = createTrain(faces, nonfaces, 0, n_faces, n_nonfaces, 0); % X : m x 256
 

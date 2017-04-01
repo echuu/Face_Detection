@@ -10,7 +10,7 @@
 --csv2tensor   =  require 'csv2tensor';
 local ext    =  require('externalFunctions');
 local boost  =  require('adaboost');
-local load   = require('load_data');
+local load   =  require('load_data');
 
 local debug  = 0;
 local FIRST_TIME_RUN = 1;

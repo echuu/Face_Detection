@@ -2,6 +2,8 @@
 % delta      : weak classifier matrix (256 x 6416)
 % delta_size : # of weak classifiers 6416 
 
+load_data()
+generate_weak_classifiers()
 
 delta_face_means    = zeros(delta_size, 1); % store the mean of faces
 delta_face_sd       = zeros(delta_size, 1); % store the sd of faces
@@ -9,16 +11,16 @@ delta_face_sd       = zeros(delta_size, 1); % store the sd of faces
 delta_nonface_means = zeros(delta_size, 1);  % store the mean of nonfaces
 delta_nonface_sd    = zeros(delta_size, 1);  % store the sd of nonfaces
 
-n_faces    = 800;
-n_nonfaces = 3200;
+n_faces    = 1000;
+n_nonfaces = 4000;
 
 faces = faces(:, 1:n_faces);
 nonfaces = nonfaces(:, 1:n_nonfaces);
 
 
 % store result of inner product of each weak classifier and each face/nonface
-faces = faces';
-nonfaces = nonfaces';
+faces = faces';         % n_faces    x 256  -- faces stored in rows
+nonfaces = nonfaces';   % n_nonfaces x 256  -- faces stored in cols
 
 positive = zeros(face_size, 1);
 negative = zeros(nonface_size, 1);
