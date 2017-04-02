@@ -77,7 +77,7 @@ delta    = nil;
 local classify = class.ll_classify;
 
 start_time = os.time();
-if FIRST_TIME == 1 then
+if FIRST_TIME == 0 then
 	--start_time = os.time();
 	for i = 1, g.delta_size do
 		local proj_i = proj[{{}, {i}}];
@@ -97,7 +97,7 @@ if FIRST_TIME == 1 then
 	-- these take really long to save
 	--torch.save('classification_matrix.dat', h_mat);
 	--torch.save('error_matrix.dat', err_mat);
-else if FIRST_TIME == 2 then
+else
 	print("Reading in classification matrix and error matrix");
 	h_mat   = torch.load('classification_matrix.dat');
 	err_mat = torch.load('error_matrix.dat');

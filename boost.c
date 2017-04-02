@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <math.h>
+#include <tgmath.h>
 #include "lua.h"
 #include "lualib.h"
 #include "lauxlib.h"
@@ -9,9 +11,10 @@ lua_State* L;
 
 int luaFunc(int x, int y)
 {
-	int sum;
+	int sum = 0;
 
 	// lua function name -- testFunction.lua
+	printf("before getglobal\n");
 	lua_getglobal(L, "testFunction");
 
 	// 1st arg
@@ -21,10 +24,12 @@ int luaFunc(int x, int y)
 	lua_pushnumber(L, y);
 
 	// call the function w/ 2 args, return 1 result
+	printf("before lua_call()\n");
 	lua_call(L, 2, 1);
+	printf("after lua_call()\n");
 
 	// get result, store in sum
-	sum = (int)lua_tointger(L, -1);
+	sum = (int)lua_tointeger(L, -1);
 	lua_pop(L, 1);
 
 	return sum;
@@ -33,11 +38,12 @@ int luaFunc(int x, int y)
 
 int main(int argc, char *argv[])
 {
-	int sum;
+	int sum = 0;
 
-	L = lua_open();
-	luaL_dofile(L, "add.lua");
-	sum = luaadd(10, 15);
+	L = luaL_newstate();
+	luaL_openlibs(L);
+	luaL_dofile(L, "testFunction.lua");
+	sum = luaFunc(10, 15);
 	printf("The sum is %d \n", sum);
 
 	lua_close(L);

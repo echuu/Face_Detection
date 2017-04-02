@@ -38,6 +38,9 @@ local function ll_classify(proj_i, m0, s0, m1, s1)
 	local cent_faces     = torch.pow((proj_i - m0), 2) / s0^2;
 	local cent_nonfaces  = torch.pow((proj_i - m1), 2) / s1^2;
 
+	--local cent_faces     = (proj_i - m0)^2 / s0^2;
+	--local cent_nonfaces  = (proj_i - m1)^2 / s1^2;
+
 
 	--print('size of centered face: '..cent_faces:size()[1]);
 	--print('size of centered nonface: '..cent_nonfaces:size()[1]);
