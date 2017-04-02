@@ -35,8 +35,11 @@ local function ll_classify(proj_i, m0, s0, m1, s1)
 
 	-- center the projections w.r.t. faces, nonfaces
 
-	local cent_faces     = torch.pow((proj_i - m0), 2) / s0^2;
-	local cent_nonfaces  = torch.pow((proj_i - m1), 2) / s1^2;
+	local sq = torch.pow;
+	local lg = torch.log;
+
+	local cent_faces     = sq((proj_i - m0), 2) / s0^2;
+	local cent_nonfaces  = sq((proj_i - m1), 2) / s1^2;
 
 	--local cent_faces     = (proj_i - m0)^2 / s0^2;
 	--local cent_nonfaces  = (proj_i - m1)^2 / s1^2;
@@ -46,7 +49,7 @@ local function ll_classify(proj_i, m0, s0, m1, s1)
 	--print('size of centered nonface: '..cent_nonfaces:size()[1]);
 
 	-- calculate ratios, take sign to classify
-	local ratio = -0.5 * (cent_faces - cent_nonfaces + torch.log(s0) - torch.log(s1));
+	local ratio = -0.5 * (cent_faces - cent_nonfaces + lg(s0) - lg(s1));
 	
 	--print('size of ratio: '..ratio:size()[1]);
 

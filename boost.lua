@@ -79,6 +79,7 @@ local classify = class.ll_classify;
 start_time = os.time();
 if FIRST_TIME == 0 then
 	--start_time = os.time();
+	--start_time = os.time();
 	for i = 1, g.delta_size do
 		local proj_i = proj[{{}, {i}}];
 		local f1, f2, nf1, nf2;
@@ -87,6 +88,7 @@ if FIRST_TIME == 0 then
 		nf1 = nonface_mean[i];
 		nf2 = nonface_sd[i];
 
+		
 		local class_vector = classify(proj_i, f1, f2, nf1, nf2);
 
 		h_mat[{{}, {i}}] = class_vector
@@ -151,9 +153,6 @@ for t = 1, T do
 	-- calculate empirical error:
 	calc.classError(Y_train, F);
 end
-
-
-
 
 ------ end adaboost ------------------------------------------------------------
 --print(min_ada_index);

@@ -11,8 +11,9 @@ delta_face_sd       = zeros(delta_size, 1); % store the sd of faces
 delta_nonface_means = zeros(delta_size, 1);  % store the mean of nonfaces
 delta_nonface_sd    = zeros(delta_size, 1);  % store the sd of nonfaces
 
-n_faces    = 1000;
+n_faces    = 2000; %% change these in load_data.m
 n_nonfaces = 4000;
+n_negs     = 4095;
 
 faces = faces(:, 1:n_faces);
 nonfaces = nonfaces(:, 1:n_nonfaces);

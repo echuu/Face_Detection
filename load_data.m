@@ -1,7 +1,7 @@
 face_size = 11838;
 nonface_size = 45356;
 
-face_size = 1000;
+face_size = 2000;
 nonface_size = 4000;
 
 

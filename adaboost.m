@@ -1,4 +1,10 @@
 % adaboost.m
+
+% Run in order: load_data, generate_weak_classifiers, calc_threshold
+load_data()
+generate_weak_classifiers()
+calc_threshold()
+
 % training set consists of: faces (1), non_faces (-1), negatives (-1)
 
 DEBUG = 0; % debug != 0 for extra iteration info
@@ -6,17 +12,17 @@ DEBUG = 0; % debug != 0 for extra iteration info
 % when faces, nonfaces come into adaboost, they have already been transposed
 % faces    -- n_faces x 256
 % nonfaces -- n_nonfaces x 256
-
+n_negs = 4095;
 m = n_faces + n_nonfaces; % 3200
-[X, Y] = createTrain(faces, nonfaces, 0, n_faces, n_nonfaces, 0); % X : m x 256
+m = n_faces + n_nonfaces + n_negs;
+[X, Y] = createTrain(faces, nonfaces, sub_images, n_faces, n_nonfaces, n_negs); 
+% X : m x 256
 
 
 %csvwrite('faces.csv', faces);
 %csvwrite('nonfaces.csv', nonfaces);
 
-T = 30;
-
-
+T = 100;
 %% begin adaboost initialization
 [F, Z, D_cur, D_prev,...
           min_ada_index, alpha, ...
