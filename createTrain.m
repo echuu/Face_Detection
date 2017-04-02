@@ -8,8 +8,9 @@ function [X, Y] = createTrain(faces, nonfaces, sub_images,...
 								n_faces, n_nonfaces, n_negs)
 	
 	% truncate sub_images -- 256 x 4095
-	sub = sub_images(:, 1:2:end)'; % 4095 x 256
+	%sub = sub_images(:, 1:2:end)'; % 4095 x 256
 
+	sub = sub_images'
 	m = n_faces + n_nonfaces + n_negs;
 	Y = zeros(m, 1);
 	Y(1:m)       = -1;

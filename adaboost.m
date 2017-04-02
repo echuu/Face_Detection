@@ -12,12 +12,14 @@ DEBUG = 0; % debug != 0 for extra iteration info
 % when faces, nonfaces come into adaboost, they have already been transposed
 % faces    -- n_faces x 256
 % nonfaces -- n_nonfaces x 256
-n_negs = 4095;
+n_negs = 8190;
 m = n_faces + n_nonfaces; % 3200
 m = n_faces + n_nonfaces + n_negs;
 [X, Y] = createTrain(faces, nonfaces, sub_images, n_faces, n_nonfaces, n_negs); 
 % X : m x 256
 
+clear faces; 
+clear nonfaces;
 
 %csvwrite('faces.csv', faces);
 %csvwrite('nonfaces.csv', nonfaces);
@@ -36,6 +38,9 @@ tic
 projections = X * delta; % pre-compute projections
 toc
 
+clear X;
+
+
 
 disp('Classifications');
 tic
@@ -48,6 +53,8 @@ for i = 1:delta_size
     class_matrix(:,i) = h;
 end
 toc
+
+clear projections;
 %csvwrite('h_mat.csv', class_matrix);
 %csvwrite('err_mat.csv', error_matrix);
 
@@ -81,3 +88,5 @@ end
 toc
 % ---------------------   end adaboost  ----------------------------------------
 %min_ada_index % top T weak classifers used in creation of strong classifer
+
+detect_class()
