@@ -15,6 +15,8 @@ m = n_faces + n_nonfaces; % 3200
 %csvwrite('nonfaces.csv', nonfaces);
 
 T = 30;
+
+
 %% begin adaboost initialization
 [F, Z, D_cur, D_prev,...
           min_ada_index, alpha, ...
@@ -23,9 +25,14 @@ T = 30;
 
 %% end adaboost initialization
 
-% pre-compute projections
-projections = X * delta;
+disp('Projection matrix computation:');
+tic
+projections = X * delta; % pre-compute projections
+toc
 
+
+disp('Classifications');
+tic
 % pre-compute classifications, error matrix
 for i = 1:delta_size
     %ip = ip_mat(:, i);
@@ -34,7 +41,7 @@ for i = 1:delta_size
     error_matrix(:,i) = h ~= Y;
     class_matrix(:,i) = h;
 end
-
+toc
 %csvwrite('h_mat.csv', class_matrix);
 %csvwrite('err_mat.csv', error_matrix);
 

@@ -3,20 +3,21 @@ local ext   = require('externalFunctions');
 local g     = require('common_defs');
 local class = require('classify.lua');
 local calc  = require('calculate.lua');
-csv2tensor  = require('csv2tensor');
+local csv2tensor  = require('csv2tensor');
 
 -- global constants-------------------------------------------------------------
 FIRST_TIME = 1;
 DEBUG      = 1;
 -- global constants-------------------------------------------------------------
 
-h_mat   = torch.DoubleTensor(g.total_imgs, g.delta_size);
-err_mat = torch.DoubleTensor(g.total_imgs, g.delta_size);
+local h_mat   = torch.Tensor(g.total_imgs, g.delta_size);
+local err_mat = torch.Tensor(g.total_imgs, g.delta_size);
+local X, Y_train;
 
 -- load in faces, nonfaces (faces, nonfaces stored as rows)---------------------
-faces       = ld.importFaces(g.csvpath, g.subset_faces, 1);       --  800 x 256
-nonfaces    = ld.importNonfaces(g.csvpath, g.subset_nonfaces, 1); -- 3200 x 256
-X, Y_train  = ext.createTrain(faces, nonfaces);                    -- 4000 x   1
+local faces       = ld.importFaces(g.csvpath, g.subset_faces, 1);       --  800 x 256
+local nonfaces    = ld.importNonfaces(g.csvpath, g.subset_nonfaces, 1); -- 3200 x 256
+X, Y_train        = ext.createTrain(faces, nonfaces);                   -- 4000 x   1
 --------------------------------------------------------------------------------
 
 if DEBUG == 1 then
@@ -27,7 +28,7 @@ end
 
 -- generate weak classifiers
 -- each weak classifiers stored as a column vector
-delta = ext.generateWC(g.dim, g.delta_size);
+local delta = ext.generateWC(g.dim, g.delta_size);
 
 -- calculate threshold
 --[[ 
@@ -53,11 +54,16 @@ else
 	nonface_sd   = torch.load('nonface_sd.dat');
 end
 
+
+
+start_time = os.time();
 -- precompute projections for classification
-proj = X * delta;
+local proj = X * delta;
 --torch.save('proj.dat', proj);
 --proj = torch.load('proj.dat');
-
+end_time = os.time();
+elapsed_time = os.difftime(end_time, start_time);
+print('Projection matrix computed. Total time: '..elapsed_time);
 
 --------------------- free memory ----------------------------------------------
 faces    = nil;
@@ -68,19 +74,18 @@ delta    = nil;
 -- precompute classifications (these don't change per iteration)
 -- store errors in matrix
 
---
+local classify = class.ll_classify;
+
 start_time = os.time();
 if FIRST_TIME == 1 then
 	--start_time = os.time();
 	for i = 1, g.delta_size do
 
-		h_mat[{{}, {i}}] = class.ll_classify(proj[{{}, {i}}],
+		h_mat[{{}, {i}}] = classify(proj[{{}, {i}}],
 			face_mean[i], face_sd[i], nonface_mean[i], nonface_sd[i]);
 
 		err_mat[{{}, {i}}] = torch.ne(Y_train, h_mat[{{}, {i}}]);
 	end
-
-	print("Classifications complete");
 
 	-- these take really long to save
 	--torch.save('classification_matrix.dat', h_mat);
@@ -97,27 +102,31 @@ else
 	--h_mat   = csv2tensor.load('h_mat.csv');
 	--err_mat = csv2tensor.load('err_mat.csv');
 end
+end_time = os.time();
+elapsed_time = os.difftime(end_time, start_time);
+print('Finished Classifications. Total time: '..elapsed_time); -- 30 seconds
 
 -- can free up proj matrix
+proj = nil;
 
-T = 20;
+local T = 30;
 local inv_total = 1 / g.total_imgs;
 
-F = torch.Tensor(g.total_imgs, 1):zero();	-- strong classifier
-Z = 0; 										-- normalizing factor
+local F = torch.Tensor(g.total_imgs, 1):zero();	-- strong classifier
+local Z = 0; 										-- normalizing factor
 
-D_cur  = torch.Tensor(g.total_imgs, 1):fill(inv_total);
-D_prev = torch.Tensor(g.total_imgs, 1):fill(inv_total);
+local D_cur  = torch.Tensor(g.total_imgs, 1):fill(inv_total);
+local D_prev = torch.Tensor(g.total_imgs, 1):fill(inv_total);
 
-min_ada_index = torch.Tensor(T, 1):zero(); -- index of w.c. w/ lowest wt. error
-alpha = torch.Tensor(T, 1):zero();
+local min_ada_index = torch.Tensor(T, 1):zero(); -- index of w.c. w/ lowest wt. error
+local alpha = torch.Tensor(T, 1):zero();
 
 ------ begin adaboost ----------------------------------------------------------
 for t = 1, T do
 	-- weighted_error = torch.Tensor(g.delta_size, 1):zero();
 
 	error, index = class.findMinWtErr(D_cur, err_mat, g.delta_size, 0, t);
-	print('wk class: '.. index..' error: '..error);
+	print('wk class: '.. index);
 
 	alpha[t]     = 0.5 * torch.log((1 - error) / error);
 	--print(torch.squeeze(alpha[t]));
@@ -136,15 +145,12 @@ for t = 1, T do
 
 	D_cur = 1/Z * inv_total * yh;
 
-
 	-- calculate empirical error:
 	calc.classError(Y_train, F);
 end
 
 
-end_time = os.time();
-elapsed_time = os.difftime(end_time, start_time);
-print('Finished running. Total time: '..elapsed_time);
+
 
 ------ end adaboost ------------------------------------------------------------
 --print(min_ada_index);
