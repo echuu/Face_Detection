@@ -4,8 +4,6 @@ csv2tensor = require('csv2tensor');
 
 local function importFaces(pathname, num_faces, csv)
 
-	--local csv2tensor = require('csv2tensor');
-
 	print("Importing faces");
 	if csv == 0 then
 		faces = torch.load(pathname.."faces.dat");
