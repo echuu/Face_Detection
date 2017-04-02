@@ -6,7 +6,7 @@ local calc  = require('calculate.lua');
 local csv2tensor  = require('csv2tensor');
 
 -- global constants-------------------------------------------------------------
-FIRST_TIME = 1;
+FIRST_TIME = 0;
 DEBUG      = 1;
 -- global constants-------------------------------------------------------------
 
@@ -80,21 +80,24 @@ start_time = os.time();
 if FIRST_TIME == 1 then
 	--start_time = os.time();
 	for i = 1, g.delta_size do
+		local proj_i = proj[{{}, {i}}];
+		local f1, f2, nf1, nf2;
+		f1  = face_mean[i];
+		f2  = face_sd[i];
+		nf1 = nonface_mean[i];
+		nf2 = nonface_sd[i];
 
-		h_mat[{{}, {i}}] = classify(proj[{{}, {i}}],
-			face_mean[i], face_sd[i], nonface_mean[i], nonface_sd[i]);
+		local class_vector = classify(proj_i, f1, f2, nf1, nf2);
 
-		err_mat[{{}, {i}}] = torch.ne(Y_train, h_mat[{{}, {i}}]);
+		h_mat[{{}, {i}}] = class_vector
+
+		err_mat[{{}, {i}}] = torch.ne(Y_train, class_vector);
 	end
 
 	-- these take really long to save
 	--torch.save('classification_matrix.dat', h_mat);
 	--torch.save('error_matrix.dat', err_mat);
-
-	--end_time = os.time();
-	--elapsed_time = os.difftime(end_time, start_time);
-	--print('Finished classifications. Total time: '..elapsed_time);
-else
+else if FIRST_TIME == 2 then
 	print("Reading in classification matrix and error matrix");
 	h_mat   = torch.load('classification_matrix.dat');
 	err_mat = torch.load('error_matrix.dat');
