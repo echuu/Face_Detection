@@ -36,6 +36,16 @@ int luaFunc(int x, int y)
 
 }
 
+int lua_adaboost(int iters)
+{
+
+	/* lua function name -- findWC.lua */
+	return 0;
+
+
+}
+
+
 int main(int argc, char *argv[])
 {
 	int sum = 0;
@@ -44,7 +54,7 @@ int main(int argc, char *argv[])
 	luaL_openlibs(L);
 	luaL_dofile(L, "testFunction.lua");
 	sum = luaFunc(10, 15);
-	printf("The sum is %d \n", sum);
+	printf("The result is %d \n", sum);
 
 	lua_close(L);
 
