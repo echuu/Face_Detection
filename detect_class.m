@@ -1,12 +1,12 @@
 % detect_class.m
 % run this script to run classifier on class images
-test_image = rgb2gray(imread('test_background/Test_Image_1.jpg'));
+test_image = rgb2gray(imread('test/Test_Image_1.jpg'));
 figure;
 imshow(test_image);
 hold on;
 step = 4;
 count = 0;
-T = 10;
+T = 100;
 for i = 1:5
     multiplier = 0.25 - (i-1) * 0.047;
     test_image_mod = imresize(test_image, multiplier);
@@ -17,18 +17,20 @@ for i = 1:5
             s = test_image_mod(j:j+dim-1, k:k+dim-1);
             s_vec = double(reshape(s,dim*dim,1));
 
-            % projection of image onto 100 weak classifiers
-            result = delta(:,min_ada_index)' * s_vec; % 100 x 1
+            % projection of image onto T weak classifiers
+            result = delta(:,min_ada_index)' * s_vec; % T x 1
 
             F = 0;
             for t = 1:T
-                [b, ratio] = bin_classify(result(t),...
-                    delta_face_means(delta_ada_chosen_index(t)),...
-                    delta_face_sd(delta_ada_chosen_index(t)),...
-                    delta_nonface_means(delta_ada_chosen_index(t)),...
-                    delta_nonface_sd(delta_ada_chosen_index(t)),...
-                    B, bins);
-                F = F + h_bt(b, t);
+                [h, ~] = gauss_classify(result(t),...
+                    delta_face_means(min_ada_index(t)),...
+                    delta_face_sd(min_ada_index(t)),...
+                    delta_nonface_means(min_ada_index(t)),...
+                    delta_nonface_sd(min_ada_index(t)));
+                
+                % weight classification, with alpha (?)
+                % calculate strong classifier
+                F = F + alpha(t) .* h;
             end
             
             if F > 0
