@@ -2,12 +2,21 @@
 local boost = {}
 
 local function adaboost(T)
+
+	print('entered adaboost function');
+
+	local torch = require('torch');
+
+	print('loaded torch');
+
 	local ld    = require('load_data');
 	local ext   = require('externalFunctions');
 	local g     = require('common_defs');
-	local class = require('classify.lua');
-	local calc  = require('calculate.lua');
+	local class = require('classify');
+	local calc  = require('calculate');
 	local csv2tensor  = require('csv2tensor');
+
+	print('finished loading all libraries');
 
 	-- global constants-------------------------------------------------------------
 	FIRST_TIME = 0;
@@ -118,7 +127,7 @@ local function adaboost(T)
 	-- can free up proj matrix
 	proj = nil;
 
-	local T = 30;
+	--local T = 30;
 	local inv_total = 1 / g.total_imgs;
 
 	local F = torch.Tensor(g.total_imgs, 1):zero();	-- strong classifier

@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <math.h>
 #include <tgmath.h>
-#include "lua.h"
 #include "lualib.h"
 #include "lauxlib.h"
+#include "luajit.h"
 
 
 /* the Lua interpreter */
@@ -39,8 +39,19 @@ int luaFunc(int x, int y)
 int lua_adaboost(int iters)
 {
 
+	int success = 0;
+
 	/* lua function name -- findWC.lua */
-	return 0;
+	lua_getglobal(L, "findWC");
+
+	// push first argument
+	lua_pushnumber(L, iters);
+
+	// call the functino with 2 args, 1 return result
+	lua_call(L, 1, 1);
+	success = (int) lua_tointeger(L, -1);
+
+	return success;
 
 
 }
@@ -48,13 +59,25 @@ int lua_adaboost(int iters)
 
 int main(int argc, char *argv[])
 {
-	int sum = 0;
+	int T = 10;
+	int success = 0;
+
 
 	L = luaL_newstate();
+	
 	luaL_openlibs(L);
+
+	printf("before call to findWC()\n");
+
+	//luaL_dofile(L, "findWC.lua");
+	//success = lua_adaboost(T);
+
 	luaL_dofile(L, "testFunction.lua");
-	sum = luaFunc(10, 15);
-	printf("The result is %d \n", sum);
+	success = luaFunc(10, 15);
+
+	if (success) {
+		printf("AdaBoost Success\n");
+	}
 
 	lua_close(L);
 
@@ -63,6 +86,4 @@ int main(int argc, char *argv[])
 	getchar();
 
 	return 0;
-
-
 }
