@@ -30,8 +30,6 @@ M.DIM           = 16;
 
 -- debug
 M.DEBUG = 0;
-
-
 ---------------------- END GLOBAL VARIABLE DECLARATION -------------------------
 
 

@@ -67,14 +67,9 @@ int main(int argc, char *argv[])
 	
 	luaL_openlibs(L);
 
-	printf("before call to findWC()\n");
-
 	luaL_dofile(L, "findWC.lua");
 	success = lua_adaboost(T);
 
-	//luaL_dofile(L, "testFunction.lua");
-	printf("before call to luaFunc\n");
-	//success = luaFunc(10, 15);
 
 	if (success) {
 		printf("AdaBoost Success\n");

@@ -1,7 +1,5 @@
 local load_data = {}
 
-
-
 local function importFaces(pathname, num_faces, csv)
 
 	local csv2tensor = require('csv2tensor');
@@ -21,7 +19,7 @@ end
 local function importNonfaces(pathname, num_nonfaces, csv)
 
 	local csv2tensor = require('csv2tensor');
-	
+
 	print("Importing nonfaces");
 	if csv == 0 then
 		nonfaces = torch.load(pathname.."nonfaces.dat");

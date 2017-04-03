@@ -1,3 +1,4 @@
+-- boost.lua
 
 local boost = {}
 
@@ -18,25 +19,26 @@ local function adaboost(T)
 
 	print('finished loading all libraries');
 
-	-- global constants-------------------------------------------------------------
+	-- global constants---------------------------------------------------------
 	FIRST_TIME = 0;
-	DEBUG      = 1;
-	-- global constants-------------------------------------------------------------
+	DEBUG      = 0;
+	-- global constants---------------------------------------------------------
 
 	local h_mat   = torch.Tensor(g.total_imgs, g.delta_size);
 	local err_mat = torch.Tensor(g.total_imgs, g.delta_size);
 	local X, Y_train;
 
-	-- load in faces, nonfaces (faces, nonfaces stored as rows)---------------------
-	local faces    = ld.importFaces(g.csvpath, g.subset_faces, 1);       --  800 x 256
-	local nonfaces = ld.importNonfaces(g.csvpath, g.subset_nonfaces, 1); -- 3200 x 256
-	X, Y_train     = ext.createTrain(faces, nonfaces);                   -- 4000 x   1
-	--------------------------------------------------------------------------------
+	-- load in faces, nonfaces (faces, nonfaces stored as rows)-----------------
+	local faces    = ld.importFaces(g.csvpath, g.subset_faces, 1); --  800 x 256
+	local nonfaces = ld.importNonfaces(g.csvpath, 
+								g.subset_nonfaces, 1);             -- 3200 x 256
+	X, Y_train     = ext.createTrain(faces, nonfaces);             -- 4000 x   1
+	----------------------------------------------------------------------------
 
 	if DEBUG == 1 then
-		--print(faces:size());     -- num_faces    x 256
-		--print(nonfaces:size());  -- num_nonfaces x 256
-		--print(Y_train:size());   -- total_imgs   x 256
+		print(faces:size());     -- num_faces    x 256
+		print(nonfaces:size());  -- num_nonfaces x 256
+		print(Y_train:size());   -- total_imgs   x 256
 	end
 
 	-- generate weak classifiers
@@ -61,15 +63,16 @@ local function adaboost(T)
 		torch.save('nonface_mean.dat', nonface_mean);
 		torch.save('nonface_sd.dat', nonface_sd);
 	else
-		face_mean    = torch.load('face_mean.dat');
-		face_sd      = torch.load('face_sd.dat');
-		nonface_mean = torch.load('nonface_mean.dat');
-		nonface_sd   = torch.load('nonface_sd.dat');
+		face_mean    = torch.load('data_files/face_mean.dat');
+		face_sd      = torch.load('data_files/face_sd.dat');
+		nonface_mean = torch.load('data_files/nonface_mean.dat');
+		nonface_sd   = torch.load('data_files/nonface_sd.dat');
 	end
 
 
 
 	start_time = os.time();
+
 	-- precompute projections for classification
 	local proj = X * delta;
 	--torch.save('proj.dat', proj);
@@ -91,8 +94,6 @@ local function adaboost(T)
 
 	start_time = os.time();
 	if FIRST_TIME == 0 then
-		--start_time = os.time();
-		--start_time = os.time();
 		for i = 1, g.delta_size do
 			local proj_i = proj[{{}, {i}}];
 			local f1, f2, nf1, nf2;
@@ -130,16 +131,16 @@ local function adaboost(T)
 	--local T = 30;
 	local inv_total = 1 / g.total_imgs;
 
-	local F = torch.Tensor(g.total_imgs, 1):zero();	-- strong classifier
-	local Z = 0; 										-- normalizing factor
+	local F = torch.Tensor(g.total_imgs, 1):zero();	     -- strong classifier
+	local Z = 0; 										 -- normalizing factor
 
 	local D_cur  = torch.Tensor(g.total_imgs, 1):fill(inv_total);
 	local D_prev = torch.Tensor(g.total_imgs, 1):fill(inv_total);
 
-	local min_ada_index = torch.Tensor(T, 1):zero(); -- index of w.c. w/ lowest wt. error
+	local min_ada_index = torch.Tensor(T, 1):zero(); -- store chosen w.c.'s
 	local alpha = torch.Tensor(T, 1):zero();
 
-	------ begin adaboost ----------------------------------------------------------
+	------ begin adaboost ------------------------------------------------------
 	for t = 1, T do
 		-- weighted_error = torch.Tensor(g.delta_size, 1):zero();
 
@@ -166,7 +167,7 @@ local function adaboost(T)
 		-- calculate empirical error:
 		calc.classError(Y_train, F);
 	end
-	------ end adaboost ------------------------------------------------------------
+	------ end adaboost --------------------------------------------------------
 end
 
 boost.adaboost = adaboost;
