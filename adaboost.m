@@ -24,7 +24,7 @@ clear nonfaces;
 %csvwrite('faces.csv', faces);
 %csvwrite('nonfaces.csv', nonfaces);
 
-T = 100;
+T = 30;
 %% begin adaboost initialization
 [F, Z, D_cur, D_prev,...
           min_ada_index, alpha, ...

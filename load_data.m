@@ -27,6 +27,6 @@ for i = 1:nonface_size
 	end
 end
 
-csvwrite('faces.csv', faces);
-csvwrite('nonfaces.csv', nonfaces);
+%% csvwrite('faces.csv', faces);
+%% csvwrite('nonfaces.csv', nonfaces);
 

@@ -6,7 +6,6 @@ imshow(test_image);
 hold on;
 step = 4;
 count = 0;
-T = 100;
 for i = 1:5
     multiplier = 0.25 - (i-1) * 0.047;
     test_image_mod = imresize(test_image, multiplier);
