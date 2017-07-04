@@ -36,15 +36,17 @@ for i = 1:k
 	csvwrite(batch_error_name, err_i);
 	csvwrite(batch_class_name, class_i);
 
-	disp(['Finished batch ', num2str(i), ' calculations']);
+	disp(['Finished batch ', num2str(i), ' classifications']);
 end % outer for loop
 disp('Finished batch calculations');
 
 % ---------------------- END ADABOOST PRECOMPUTATIONS ------------------------ %
 T = 10;
 
-for t = 1:T
+disp('begin adaboost calculations');
 
+for t = 1:T
+	disp(['iter ' num2str(t)]);
 	tic
 
 	[err, batch_id, ind, h] = batchMinimize(D_cur, delta_size, k);

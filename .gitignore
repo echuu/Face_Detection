@@ -10,3 +10,11 @@ nonface_sd.dat
 error_matrix.dat
 nonface_mean.dat
 classification_matrix.dat
+err_mat_1.csv
+err_mat_2.csv
+err_mat_3.csv
+err_mat_4.csv
+class_mat_1.csv
+class_mat_2.csv
+class_mat_3.csv
+class_mat_4.csv

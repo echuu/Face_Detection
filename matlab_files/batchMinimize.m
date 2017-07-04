@@ -16,6 +16,8 @@ function [err, batch_id, ind, h] = batchMinimize(weights, dim, num_batches)
 
 	% read in error_matrix, class_matrix for each of the k batches
 
+	err_vec_i = zeros(1, dim);
+
 	for i = 1:num_batches
 
 		batch_error_name = ['err_mat_', num2str(i), '.csv'];
@@ -24,19 +26,19 @@ function [err, batch_id, ind, h] = batchMinimize(weights, dim, num_batches)
 		err_mat_i   = csvread(batch_error_name);
 		class_mat_i = csvread(batch_class_name); 
 
-		err_vec_i = weights' * err_mat_i; % 1 x delta_size
-
-		% find minimum weighted error across all batches
-		for j = 1:dim % iterate thru weak classifiers
-			if err_vec(j) < min_wt_err
-				min_wt_err = err_vec(j);
-				min_ind = j;
-				batch_id = i;
-				h = class_mat_i(:, min_ind); % 'best' class. (w.r.t. wt. error)
-			end
-		end % inner for loop
+		err_vec_i = err_vec_i + weights' * err_mat_i; % 1 x delta_size
 
 	end % outer for loop
+
+	% find minimum weighted error across all batches
+	for j = 1:dim % iterate thru weak classifiers
+		if err_vec(j) < min_wt_err
+			min_wt_err = err_vec(j);
+			min_ind = j;
+			batch_id = i;
+			h = class_mat_i(:, min_ind); % 'best' class. (w.r.t. wt. error)
+		end
+	end % inner for loop
 
 	err      = min_wt_err;
 	ind      = min_ind;
