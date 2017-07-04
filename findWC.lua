@@ -9,3 +9,5 @@ function findWC(T)
 
 	return 1;
 end
+
+findWC(10)

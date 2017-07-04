@@ -29,9 +29,9 @@ local function adaboost(T)
 	local X, Y_train;
 
 	-- load in faces, nonfaces (faces, nonfaces stored as rows)-----------------
-	local faces    = ld.importFaces(g.csvpath, g.subset_faces, 1); --  800 x 256
+	local faces    = ld.importFaces(g.csvpath, g.subset_faces, 0); --  800 x 256
 	local nonfaces = ld.importNonfaces(g.csvpath, 
-								g.subset_nonfaces, 1);             -- 3200 x 256
+								g.subset_nonfaces, 0);             -- 3200 x 256
 	X, Y_train     = ext.createTrain(faces, nonfaces);             -- 4000 x   1
 	----------------------------------------------------------------------------
 
@@ -68,8 +68,6 @@ local function adaboost(T)
 		nonface_mean = torch.load('data_files/nonface_mean.dat');
 		nonface_sd   = torch.load('data_files/nonface_sd.dat');
 	end
-
-
 
 	start_time = os.time();
 

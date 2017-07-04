@@ -7,7 +7,7 @@
 
 local M = {}
 
------------------------ GLOBAL VARIABLE DECLARATION -------------------------
+----------------------- GLOBAL VARIABLE DECLARATION ---------------------------
 -- feature 1
 M.HAAR_1_COLS = 2;
 M.HAAR_1_ROWS = 1;

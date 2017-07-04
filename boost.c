@@ -59,7 +59,7 @@ int lua_adaboost(int iters)
 
 int main(int argc, char *argv[])
 {
-	int T = 10;
+	int T = 30;
 	int success = 0;
 
 

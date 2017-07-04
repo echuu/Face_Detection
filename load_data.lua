@@ -9,6 +9,7 @@ local function importFaces(pathname, num_faces, csv)
 		faces = torch.load(pathname.."faces.dat");
 	else
 		faces = csv2tensor.load(pathname.."faces.csv");
+		--torch.save('faces.dat', faces);
 	end
 	faces = faces[{{}, {1, num_faces}}];
 	faces = faces:t();
@@ -25,6 +26,7 @@ local function importNonfaces(pathname, num_nonfaces, csv)
 		nonfaces = torch.load(pathname.."nonfaces.dat");
 	else
 		nonfaces = csv2tensor.load(pathname.."nonfaces.csv");
+		--torch.save('nonfaces.dat', nonfaces);
 	end
 	nonfaces = nonfaces[{{}, {1, num_nonfaces}}];
 	nonfaces = nonfaces:t();
