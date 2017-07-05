@@ -6,6 +6,8 @@ load_data()
 generate_weak_classifiers()
 calc_threshold()
 
+disp('Finished calculating threshold');
+
 % training set consists of: faces (1), non_faces (-1), negatives (-1)
 
 DEBUG = 0; % debug != 0 for extra iteration info
@@ -16,17 +18,14 @@ DEBUG = 0; % debug != 0 for extra iteration info
 
 % n_negs = 8190;
 n_negs = 0;
-m = n_faces + n_nonfaces + n_negs;
+m = FACE_SIZE + NONFACE_SIZE + NEG_SIZE;
 % [X, Y] = createTrain(faces, nonfaces, sub_images, n_faces, n_nonfaces, n_negs);
-[X, Y] = createTrain(faces, nonfaces, 0, n_faces, n_nonfaces, 0);
+[X, Y] = createTrain(faces, nonfaces, 0, FACE_SIZE, NONFACE_SIZE, 0);
 
 % X : m x 256
 
 % clear faces; 
 % clear nonfaces;
-
-% csvwrite('faces.csv', faces);
-% csvwrite('nonfaces.csv', nonfaces);
 
 T = 30;
 %% begin adaboost initialization

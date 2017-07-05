@@ -1,10 +1,8 @@
 % batchAda.m
 
-% see first part of adaboost.m
-
 if 1 == 1
-	load_data();
-	generate_weak_classifiers();
+	% load_data();
+	% generate_weak_classifiers();
 	calc_threshold();
 end
 
@@ -38,10 +36,8 @@ k = 4;     % split the number of faces/nonface into k batches
 
 train_batch = linspace(0, m, k + 1);
 
-[F, Z, D_cur, D_prev,...
-	          wc_ind, alpha, ...
-	          class_matrix, error_matrix] = ...
-	    initializeAdaBoost(m, T, delta_size);
+[F, Z, D_cur, D_prev, wc_ind, alpha, ...
+	class_matrix, error_matrix] = initializeAdaBoost(m, T, delta_size);
 
 disp('begin adaboost calculations');
 
@@ -57,7 +53,6 @@ for t = 1:T
 	alpha(t) = 0.5 * log((1 - err) / err);
 	
 	wc_ind(t) = ind; 
-
 
 	% generate strong classifier, perform updates
 	F     = F + alpha(t) .* h;

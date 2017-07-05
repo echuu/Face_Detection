@@ -11,8 +11,8 @@ delta_face_sd       = zeros(delta_size, 1);       % store the sd of faces
 delta_nonface_means = zeros(delta_size, 1);  	  % store the mean of nonfaces
 delta_nonface_sd    = zeros(delta_size, 1);  	  % store the sd of nonfaces
 
-%FACE_SIZE    = FACE_SIZE;                     	  % change these in load_data.m
-%NONFACE_SIZE = NONFACE_SIZE;
+% FACE_SIZE    = FACE_SIZE;                       % change these in load_data.m
+% NONFACE_SIZE = NONFACE_SIZE;
 
 faces = faces(:, 1:FACE_SIZE);
 nonfaces = nonfaces(:, 1:NONFACE_SIZE);

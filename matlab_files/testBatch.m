@@ -1,10 +1,10 @@
-% batchMinimize.m
+% testBatch.m
 
 % findMinWtErr() rewritten to minimize over batches
-
 % weights (m x 1) holds weights for each of the images
-function [err, ind, h] = testBatch(weights, dim, num_batches, train_batch, X, delta,...
-			delta_face_means, delta_face_sd, delta_nonface_means, delta_nonface_sd, Y)
+function [err, ind, h] = testBatch(weights, dim, num_batches, train_batch, ...
+							X, delta, delta_face_means, delta_face_sd, ...
+							delta_nonface_means, delta_nonface_sd, Y)
 
 	% return quantities:
 		% weighted error (needed for updating alphas)
@@ -34,8 +34,8 @@ function [err, ind, h] = testBatch(weights, dim, num_batches, train_batch, X, de
 	p_i = X * delta(:,min_ind);
 
 	[h, ~] = gauss_classify(p_i, delta_face_means(min_ind),...
-			delta_face_sd(min_ind), delta_nonface_means(min_ind),...
-			delta_nonface_sd(min_ind));
+				delta_face_sd(min_ind), delta_nonface_means(min_ind),...
+				delta_nonface_sd(min_ind));
 
 	err      = min_wt_err;
 	ind      = min_ind;
