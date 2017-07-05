@@ -22,11 +22,11 @@ m = n_faces + n_nonfaces + n_negs;
 
 % X : m x 256
 
-%clear faces; 
-%clear nonfaces;
+% clear faces; 
+% clear nonfaces;
 
-%csvwrite('faces.csv', faces);
-%csvwrite('nonfaces.csv', nonfaces);
+% csvwrite('faces.csv', faces);
+% csvwrite('nonfaces.csv', nonfaces);
 
 T = 30;
 %% begin adaboost initialization

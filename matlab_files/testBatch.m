@@ -18,7 +18,7 @@ function [err, ind, h] = testBatch(weights, dim, num_batches, train_batch, X, de
 
 	err_vec_i = zeros(1, dim);
 	%tic
-	computeErrClass(); % calculate weighted error for each w.c.
+	computeClassifications();
 	%toc
 
 	% find minimum weighted error across all batches
