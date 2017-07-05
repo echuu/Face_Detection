@@ -8,7 +8,6 @@ function [err, ind, h] = testBatch(weights, dim, num_batches, train_batch, X, de
 
 	% return quantities:
 		% weighted error (needed for updating alphas)
-		% batch_id: used to determine which train_batch to find the wk class.
 		% ind: index of the w.c. within the train_batch
 		% h: the classification that gives the lowest weighted error
 
@@ -18,9 +17,9 @@ function [err, ind, h] = testBatch(weights, dim, num_batches, train_batch, X, de
 	% read in error_matrix, class_matrix for each of the k batches
 
 	err_vec_i = zeros(1, dim);
-	tic
-	computeErrClass();
-	toc
+	%tic
+	computeErrClass(); % calculate weighted error for each w.c.
+	%toc
 
 	% find minimum weighted error across all batches
 	for j = 1:dim % iterate thru weak classifiers
@@ -30,7 +29,6 @@ function [err, ind, h] = testBatch(weights, dim, num_batches, train_batch, X, de
 		end
 	end % inner for loop
 
-	% use cached train_batch
 	h = zeros(size(weights,1), 1); % m x 1
 
 	p_i = X * delta(:,min_ind);
@@ -42,4 +40,4 @@ function [err, ind, h] = testBatch(weights, dim, num_batches, train_batch, X, de
 	err      = min_wt_err;
 	ind      = min_ind;
 
-% end batchMinimize.m
+% end testBatch.m

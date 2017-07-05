@@ -2,7 +2,7 @@
 
 % see first part of adaboost.m
 
-if 1 == 0
+if 1 == 1
 	load_data();
 	generate_weak_classifiers();
 	calc_threshold();
@@ -25,7 +25,7 @@ if 1 == 1
 
 	% clear faces; 
 	% clear nonfaces;
-	T = 10;
+	T = 30;
 
 	disp('first chunk complete');
 end
@@ -48,7 +48,7 @@ train_batch = linspace(0, m, k + 1);
 disp('begin adaboost calculations');
 
 for t = 1:T
-	disp(['iter ' num2str(t)]);
+	%disp(['iter ' num2str(t)]);
 	tic
 
 	[err, ind, h] = testBatch(D_cur, delta_size, k, train_batch, X, ...

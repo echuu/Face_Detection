@@ -1,6 +1,7 @@
 % adaboost.m
 
 % Run in order: load_data, generate_weak_classifiers, calc_threshold
+defineGlobals();
 load_data()  
 generate_weak_classifiers()
 calc_threshold()
@@ -21,13 +22,13 @@ m = n_faces + n_nonfaces + n_negs;
 
 % X : m x 256
 
-clear faces; 
-clear nonfaces;
+%clear faces; 
+%clear nonfaces;
 
 %csvwrite('faces.csv', faces);
 %csvwrite('nonfaces.csv', nonfaces);
 
-T = 10;
+T = 30;
 %% begin adaboost initialization
 [F, Z, D_cur, D_prev,...
           min_ada_index, alpha, ...
@@ -94,6 +95,5 @@ toc
 min_ada_index
 
 % ---------------------   end adaboost  ----------------------------------------
-%min_ada_index % top T weak classifers used in creation of strong classifer
 
 % detect_class()
