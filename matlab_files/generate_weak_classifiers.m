@@ -25,8 +25,8 @@ for i = 0:step:dim
                 delta(:, n)            = reshape(window, dim * dim, 1);
                 delta(:, n + 1)        = reshape(window_t, dim * dim, 1);
 
-                disp(['Generating weak classifer ' num2str(n)]);
-                disp(['Generating weak classifer ' num2str(n + 1)]);
+                %disp(['Generating weak classifer ' num2str(n)]);
+                %disp(['Generating weak classifer ' num2str(n + 1)]);
 
                 %disp(window);                
                 n = n + 2;
@@ -47,8 +47,8 @@ for i = 0:step:dim
                 delta(:, n)          = reshape(window,   dim * dim, 1);
                 delta(:, n + 1)      = reshape(window_t, dim * dim, 1);
 
-                disp(['Generating weak classifer ' num2str(n)]);
-                disp(['Generating weak classifer ' num2str(n + 1)]);
+                %disp(['Generating weak classifer ' num2str(n)]);
+                %disp(['Generating weak classifer ' num2str(n + 1)]);
                 %disp(window);
                 n = n + 2;
             end
@@ -70,8 +70,8 @@ for i = 0:step:dim
                 delta(:, n)     = reshape(window, dim*dim, 1);
                 delta(:, n + 1) = reshape(window_t, dim*dim,1);
 
-                disp(['Generating weak classifer ' num2str(n)]);
-                disp(['Generating weak classifer ' num2str(n + 1)]);
+                %disp(['Generating weak classifer ' num2str(n)]);
+                %disp(['Generating weak classifer ' num2str(n + 1)]);
 
                 n = n + 2;
             end

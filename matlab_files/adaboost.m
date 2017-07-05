@@ -27,7 +27,7 @@ clear nonfaces;
 %csvwrite('faces.csv', faces);
 %csvwrite('nonfaces.csv', nonfaces);
 
-T = 30;
+T = 10;
 %% begin adaboost initialization
 [F, Z, D_cur, D_prev,...
           min_ada_index, alpha, ...
@@ -90,6 +90,9 @@ for t = 1:T
 
 end
 toc
+
+min_ada_index
+
 % ---------------------   end adaboost  ----------------------------------------
 %min_ada_index % top T weak classifers used in creation of strong classifer
 

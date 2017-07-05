@@ -2,13 +2,44 @@
 
 % see first part of adaboost.m
 
+if 1 == 1
+	load_data();
+	generate_weak_classifiers();
+	calc_threshold();
+
+	DEBUG = 0; % debug != 0 for extra iteration info
+
+	% when faces, nonfaces come into adaboost, they have already been transposed
+	% faces    -- n_faces x 256
+	% nonfaces -- n_nonfaces x 256
+
+	% n_negs = 8190;
+	n_negs = 0;
+	m = n_faces + n_nonfaces + n_negs;
+	% [X, Y] = createTrain(faces, nonfaces, sub_images, n_faces, n_nonfaces, n_negs);
+	[X, Y] = createTrain(faces, nonfaces, 0, n_faces, n_nonfaces, 0);
+
+	% X : m x 256
+
+	clear faces; 
+	clear nonfaces;
+	T = 10;
+
+	%% begin adaboost initialization
+	[F, Z, D_cur, D_prev,...
+	          wc_ind, alpha, ...
+	          class_matrix, error_matrix] = ...
+	    initializeAdaBoost(m, T, delta_size);
+
+	disp('first chunk complete');
+end
 
 % rewrite the the loop that precomputes the error matrix, classification matrix
 % rewrite findMinWtErrr() function to iterate thru each train_batch to find the
 % index, train_batch of weak classifier that minimizes the weighted error
 
 % ---------------------- ADABOOST PRECOMPUTATIONS ---------------------------- %
-if 1 == 0
+if 1 == 1
 	k = 4; % split the number of faces/nonface into k batches
 	       % X is 5000 x 256 --> dim(X_i) = 1250 x 256
 	train_batch = linspace(0, m, k + 1);
@@ -18,7 +49,7 @@ if 1 == 0
 		X_i    = X(train_batch(i) + 1:train_batch(i+1), :);
 		proj_i = X_i * delta; % m_i x delta_size
 
-		% initialize err_i, class_i with proper dimensions (both m_i x delta_size)
+		% initialize err_i, class_i with proper dim (both m_i x delta_size)
 		err_i   = zeros(m_i, delta_size);
 		class_i = zeros(m_i, delta_size);
 
@@ -43,7 +74,6 @@ if 1 == 0
 end
 
 % ---------------------- END ADABOOST PRECOMPUTATIONS ------------------------ %
-T = 10;
 
 disp('begin adaboost calculations');
 
