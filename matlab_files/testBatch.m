@@ -3,7 +3,9 @@
 % findMinWtErr() rewritten to minimize over batches
 
 % weights (m x 1) holds weights for each of the images
-function [err, ind, h] = batchMinimize(weights, dim, num_batches, train_batch)
+function [err, ind, h] = testBatch(weights, dim, num_batches, train_batch, X, delta,...
+			delta_face_means, delta_face_sd, delta_nonface_means, delta_nonface_sd, Y)
+
 	% return quantities:
 		% weighted error (needed for updating alphas)
 		% batch_id: used to determine which train_batch to find the wk class.
@@ -17,21 +19,7 @@ function [err, ind, h] = batchMinimize(weights, dim, num_batches, train_batch)
 
 	err_vec_i = zeros(1, dim);
 	tic
-	for i = 1:num_batches
-
-		batch_error_name = ['err_mat_', num2str(i), '.csv'];
-		batch_class_name = ['class_mat_', num2str(i), '.csv'];
-
-		err_mat_i   = csvread(batch_error_name);
-		class_mat_i = csvread(batch_class_name); 
-
-		wt_i = weights(train_batch(i)+1:train_batch(i+1))';
-
-		err_vec_i = err_vec_i +  wt_i * err_mat_i; % 1 x delta_size
-
-		disp(['train_batch ', num2str(i), ' loaded']);
-
-	end % outer for loop
+	computeErrClass();
 	toc
 
 	% find minimum weighted error across all batches
@@ -44,17 +32,12 @@ function [err, ind, h] = batchMinimize(weights, dim, num_batches, train_batch)
 
 	% use cached train_batch
 	h = zeros(size(weights,1), 1); % m x 1
-	h(train_batch(num_batches)+1:train_batch(num_batches+1)) = class_mat_i(:, min_ind); 
 
-	for j = 1:(num_batches - 1)
+	p_i = X * delta(:,min_ind);
 
-		batch_class_name = ['class_mat_', num2str(j), '.csv'];
-
-		class_mat_i = csvread(batch_class_name); % read in each train_batch
-
-		h(train_batch(j)+1:train_batch(j+1)) = class_mat_i(:, min_ind); % get col: min_ind
-
-	end
+	[h, ~] = gauss_classify(p_i, delta_face_means(min_ind),...
+			delta_face_sd(min_ind), delta_nonface_means(min_ind),...
+			delta_nonface_sd(min_ind));
 
 	err      = min_wt_err;
 	ind      = min_ind;

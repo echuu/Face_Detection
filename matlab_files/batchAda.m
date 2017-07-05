@@ -2,11 +2,13 @@
 
 % see first part of adaboost.m
 
-if 1 == 1
+if 1 == 0
 	load_data();
 	generate_weak_classifiers();
 	calc_threshold();
+end
 
+if 1 == 1
 	DEBUG = 0; % debug != 0 for extra iteration info
 
 	% when faces, nonfaces come into adaboost, they have already been transposed
@@ -21,15 +23,9 @@ if 1 == 1
 
 	% X : m x 256
 
-	clear faces; 
-	clear nonfaces;
+	% clear faces; 
+	% clear nonfaces;
 	T = 10;
-
-	%% begin adaboost initialization
-	[F, Z, D_cur, D_prev,...
-	          wc_ind, alpha, ...
-	          class_matrix, error_matrix] = ...
-	    initializeAdaBoost(m, T, delta_size);
 
 	disp('first chunk complete');
 end
@@ -38,45 +34,16 @@ end
 % rewrite findMinWtErrr() function to iterate thru each train_batch to find the
 % index, train_batch of weak classifier that minimizes the weighted error
 
-% ---------------------- ADABOOST PRECOMPUTATIONS ---------------------------- %
-if 1 == 1
-	k = 4; % split the number of faces/nonface into k batches
-	       % X is 5000 x 256 --> dim(X_i) = 1250 x 256
-	train_batch = linspace(0, m, k + 1);
-	
-	tic
-	for i = 1:k
-		m_i    = train_batch(2) - train_batch(1); % number of images
-		X_i    = X(train_batch(i) + 1:train_batch(i+1), :);
-		proj_i = X_i * delta; % m_i x delta_size
+k = 4; % split the number of faces/nonface into k batches
+	   % X is 5000 x 256 --> dim(X_i) = 1250 x 256
 
-		% initialize err_i, class_i with proper dim (both m_i x delta_size)
-		err_i   = zeros(m_i, delta_size);
-		class_i = zeros(m_i, delta_size);
+train_batch = linspace(0, m, k + 1);
 
-		% calculate error matrix, classification matrix for the i-th train_batch
-		% 1 <= i <= k
-		for j = 1:delta_size
-			[h_i, ~]   = gauss_classify(proj_i(:,j), delta_face_means(j),...
-				delta_face_sd(j), delta_nonface_means(j), delta_nonface_sd(j));
-			err_i(:,j)   = h_i ~= Y(train_batch(i) + 1:train_batch(i+1));
-			class_i(:,j) = h_i; 
-		end % inner for loop
+[F, Z, D_cur, D_prev,...
+	          wc_ind, alpha, ...
+	          class_matrix, error_matrix] = ...
+	    initializeAdaBoost(m, T, delta_size);
 
-		batch_error_name = ['err_mat_', num2str(i), '.csv'];
-		batch_class_name = ['class_mat_', num2str(i), '.csv'];
-
-		%csvwrite(batch_error_name, err_i);
-		%csvwrite(batch_class_name, class_i);
-
-		disp(['Finished train_batch ', num2str(i), ' classifications']);
-	end % outer for loop
-	toc
-
-	disp('Finished train_batch calculations');
-end
-
-% ---------------------- END ADABOOST PRECOMPUTATIONS ------------------------ %
 
 disp('begin adaboost calculations');
 
@@ -84,7 +51,9 @@ for t = 1:T
 	disp(['iter ' num2str(t)]);
 	tic
 
-	[err, ind, h] = batchMinimize(D_cur, delta_size, k, train_batch);
+	[err, ind, h] = testBatch(D_cur, delta_size, k, train_batch, X, ...
+		delta,delta_face_means, delta_face_sd, ...
+		delta_nonface_means, delta_nonface_sd, Y);
 
 	alpha(t) = 0.5 * log((1 - err) / err);
 	
