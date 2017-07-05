@@ -3,11 +3,11 @@
 % findMinWtErr() rewritten to minimize over batches
 
 % weights (m x 1) holds weights for each of the images
-function [err, ind, h] = batchMinimize(weights, dim, num_batches)
+function [err, ind, h] = batchMinimize(weights, dim, num_batches, train_batch)
 	% return quantities:
 		% weighted error (needed for updating alphas)
-		% batch_id: used to determine which batch to find the wk class.
-		% ind: index of the w.c. within the batch
+		% batch_id: used to determine which train_batch to find the wk class.
+		% ind: index of the w.c. within the train_batch
 		% h: the classification that gives the lowest weighted error
 
 	min_id     = -1;
@@ -25,30 +25,36 @@ function [err, ind, h] = batchMinimize(weights, dim, num_batches)
 		err_mat_i   = csvread(batch_error_name);
 		class_mat_i = csvread(batch_class_name); 
 
-		err_vec_i = err_vec_i + weights' * err_mat_i; % 1 x delta_size
+		wt_i = weights(train_batch(i)+1:train_batch(i+1))';
+
+		err_vec_i = err_vec_i +  wt_i * err_mat_i; % 1 x delta_size
+
+		disp(['train_batch ', num2str(i), ' loaded']);
 
 	end % outer for loop
 
 	% find minimum weighted error across all batches
 	for j = 1:dim % iterate thru weak classifiers
-		if err_vec(j) < min_wt_err
-			min_wt_err = err_vec(j);
+		if err_vec_i(j) < min_wt_err
+			min_wt_err = err_vec_i(j);
 			min_ind = j;
 		end
 	end % inner for loop
 
 	% line below needs to be fixed to get the i-th column of each 
-	% batch matrix -- looks like it will need reading in of each batch again
+	% train_batch matrix -- looks like it will need reading in of each train_batch again
 
-	h(batch(k)+1:batch(k+1)) = class_mat_i(:, min_ind); % use cached batch
+	% use cached train_batch
+	h = zeros(size(weights,1), 1); % m x 1
+	h(train_batch(num_batches)+1:train_batch(num_batches+1)) = class_mat_i(:, min_ind); 
 
 	for j = 1:(num_batches - 1)
 
-		batch_class_name = ['class_mat_', num2str(i), '.csv'];
+		batch_class_name = ['class_mat_', num2str(j), '.csv'];
 
-		class_mat_i = csvread(batch_class_name);            % read in each batch
+		class_mat_i = csvread(batch_class_name); % read in each train_batch
 
-		h(batch(j)+1:batch(j+1)) = class_mat_i(:, min_ind); % get col: min_ind
+		h(train_batch(j)+1:train_batch(j+1)) = class_mat_i(:, min_ind); % get col: min_ind
 
 	end
 
