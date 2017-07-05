@@ -43,8 +43,9 @@ if 1 == 1
 	k = 4; % split the number of faces/nonface into k batches
 	       % X is 5000 x 256 --> dim(X_i) = 1250 x 256
 	train_batch = linspace(0, m, k + 1);
+	
+	tic
 	for i = 1:k
-
 		m_i    = train_batch(2) - train_batch(1); % number of images
 		X_i    = X(train_batch(i) + 1:train_batch(i+1), :);
 		proj_i = X_i * delta; % m_i x delta_size
@@ -65,11 +66,13 @@ if 1 == 1
 		batch_error_name = ['err_mat_', num2str(i), '.csv'];
 		batch_class_name = ['class_mat_', num2str(i), '.csv'];
 
-		csvwrite(batch_error_name, err_i);
-		csvwrite(batch_class_name, class_i);
+		%csvwrite(batch_error_name, err_i);
+		%csvwrite(batch_class_name, class_i);
 
 		disp(['Finished train_batch ', num2str(i), ' classifications']);
 	end % outer for loop
+	toc
+
 	disp('Finished train_batch calculations');
 end
 

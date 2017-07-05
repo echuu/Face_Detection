@@ -1,8 +1,8 @@
 face_size = 11838;
 nonface_size = 45356;
 
-face_size = 100;
-nonface_size = 400;
+face_size = 1000;
+nonface_size = 4000;
 
 
 face_dims = 16 * 16;
